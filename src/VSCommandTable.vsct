@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+  <Include href="KnownImageIds.vsct"/>
+
+  <Commands package="guidPackage">
+    <Groups>
+      <!--<Group guid="guidPackageCmdSet" id="MyMenuGroup" priority="0x0300">
+        <Parent guid="CssCmdSet" id="cssContextMenu"/>
+      </Group>-->
+    </Groups>
+
+    <Buttons>
+      <!--<Button guid="guidPackageCmdSet" id="AutoPrefixCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidPackageCmdSet" id="MyMenuGroup" />
+        <Icon guid="ImageCatalogGuid" id="LESSStyleSheet"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DefaultDisabled</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <Strings>
+          <ButtonText>Autoprefix</ButtonText>
+          <CanonicalName>AutoPrefix</CanonicalName>
+        </Strings>
+      </Button>-->
+    </Buttons>
+  </Commands>
+
+  <Symbols>
+    <GuidSymbol name="guidPackage" value="{5ac1b994-61c2-4d5c-ab54-3c64f095a843}" />
+
+    <GuidSymbol name="guidPackageCmdSet" value="{e9baa158-19eb-488b-93a6-9f305e55a422}">
+      <IDSymbol name="MyMenuGroup" value="0x1020" />
+      <IDSymbol name="AutoPrefixCommandId" value="0x0100" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>
