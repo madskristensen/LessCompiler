@@ -77,9 +77,9 @@ namespace LessCompiler
                 return null;
 
             string fileName = Path.GetFileName(filePath);
-            string arguments = $"\"\"{_executable}\" \"{fileName}\" --no-color {args}\"";
+            string arguments = $"\"{fileName}\" --no-color {args}";
 
-            var start = new ProcessStartInfo("cmd", $"/c {arguments}")
+            var start = new ProcessStartInfo("cmd", $"/c \"\"{_executable}\" {arguments}\"")
             {
                 WorkingDirectory = Path.GetDirectoryName(filePath),
                 UseShellExecute = false,

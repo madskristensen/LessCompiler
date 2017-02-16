@@ -56,9 +56,9 @@ namespace LessCompiler
 
                 if (exist)
                 {
-                    string oldCss = File.ReadAllText(options.OutputFilePath);
+                    string existingCssFile = File.ReadAllText(options.OutputFilePath);
 
-                    if (oldCss == result.Output)
+                    if (existingCssFile == result.Output)
                     {
                         VsHelpers.WriteStatus("CSS file didn't change after compilation");
                         return;
@@ -87,7 +87,9 @@ namespace LessCompiler
             }
 
             if (options.Minify)
+            {
                 Minify(options.OutputFilePath, result.Output);
+            }
 
             VsHelpers.WriteStatus($"LESS file compiled in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
         }

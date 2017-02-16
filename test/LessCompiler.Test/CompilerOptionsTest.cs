@@ -57,5 +57,27 @@ namespace LessCompilerTest
             Assert.IsFalse(options.Compile);
             Assert.IsFalse(options.Minify);
         }
+
+        [TestMethod]
+        public void OnlyOutFile()
+        {
+            var options = CompilerOptions.Parse(_lessFilePath, "/* lessc out.css */");
+
+            Assert.IsFalse(options.WriteToDisk);
+            Assert.AreEqual(options.OutputFilePath, Path.Combine(Path.GetDirectoryName(_lessFilePath), "out.css"));
+            Assert.IsTrue(options.Compile);
+            Assert.IsTrue(options.Minify);
+        }
+
+        [TestMethod]
+        public void OutFileWithSpaces()
+        {
+            var options = CompilerOptions.Parse(_lessFilePath, "/* lessc \"out file.css\" */");
+
+            Assert.IsFalse(options.WriteToDisk);
+            Assert.AreEqual(options.OutputFilePath, Path.Combine(Path.GetDirectoryName(_lessFilePath), "out file.css"));
+            Assert.IsTrue(options.Compile);
+            Assert.IsTrue(options.Minify);
+        }
     }
 }

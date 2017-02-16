@@ -17,6 +17,7 @@ See the [change log](CHANGELOG.md) for changes and road map.
 - Uses the [official LESS](https://www.npmjs.com/package/less) node module
 - Automatially runs [autoprefix](https://www.npmjs.com/package/less-plugin-autoprefix)
 - Automatically runs [CSSComb](https://www.npmjs.com/package/less-plugin-csscomb)
+- All compiler options configurable
 
 ### Compile on save
 All .less files will automatically be compiled into a .css file nested under it in Solution Explorer.
@@ -27,7 +28,7 @@ The automatic compilation doesn't happen if:
 
 1. The .less file starts with an `_` like `_variables.less`
 2. The .less file isn't part of any project
-3. A comment in the .less file with the word `nocompile` is found
+3. A comment in the .less file with the word `no-compile` is found
 
 ## Contribute
 Check out the [contribution guidelines](.github/CONTRIBUTING.md)
