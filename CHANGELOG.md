@@ -2,7 +2,7 @@
 
 - [x] Configurable options per file
 - [x] Add unit tests
-- [ ] Support minification
+- [x] Support minification
 - [ ] Add `Generated` wartermark on compiled .css file
 
 Features that have a checkmark are complete and available for

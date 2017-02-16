@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Tasks = System.Threading.Tasks;
+using NUglify;
+using NUglify.Css;
 
 namespace LessCompiler
 {
@@ -65,13 +67,44 @@ namespace LessCompiler
                 File.WriteAllText(options.OutputFilePath, result.Output, new UTF8Encoding(true));
                 VsHelpers.AddNestedFile(lessFilePath, options.OutputFilePath);
             }
+            else if (!options.WriteToDisk)
+            {
+                ProjectItem item = VsHelpers.DTE.Solution.FindProjectItem(lessFilePath);
+
+                if (item?.ContainingProject != null)
+                {
+                    VsHelpers.AddFileToProject(item.ContainingProject, options.OutputFilePath);
+                }
+            }
+
+            if (options.Minify)
+                Minify(options.OutputFilePath, result.Output);
 
             VsHelpers.WriteStatus($"LESS file compiled in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
         }
 
-        public static void Minify(string cssFilePath)
+        public static void Minify(string cssFilePath, string cssContent = null)
         {
+            if (string.IsNullOrEmpty(cssContent))
+            {
+                cssContent = File.ReadAllText(cssFilePath);
+            }
 
+            var settings = new CssSettings
+            {
+                ColorNames = CssColor.Strict,
+                CommentMode = CssComment.Important
+            };
+
+            UgliflyResult result = Uglify.Css(cssContent, settings);
+
+            if (result.HasErrors)
+                return;
+
+            string minFilePath = Path.ChangeExtension(cssFilePath, ".min.css");
+            VsHelpers.CheckFileOutOfSourceControl(minFilePath);
+            File.WriteAllText(minFilePath, result.Code, new UTF8Encoding(true));
+            VsHelpers.AddNestedFile(cssFilePath, minFilePath);
         }
 
         public static async Tasks.Task Install(NodeProcess node)
