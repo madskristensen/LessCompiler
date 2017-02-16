@@ -77,8 +77,9 @@ namespace LessCompiler
                 return null;
 
             string fileName = Path.GetFileName(filePath);
+            string arguments = $"\"\"{_executable}\" \"{fileName}\" --no-color {args}\"";
 
-            var start = new ProcessStartInfo("cmd", $"/c \"\"{_executable}\" \"{fileName}\" --no-color {args}\"")
+            var start = new ProcessStartInfo("cmd", $"/c {arguments}")
             {
                 WorkingDirectory = Path.GetDirectoryName(filePath),
                 UseShellExecute = false,
@@ -102,13 +103,13 @@ namespace LessCompiler
 
                     proc.WaitForExit();
 
-                    return new CompilerResult(output, error);
+                    return new CompilerResult(output, error, arguments);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Log(ex);
-                return new CompilerResult(null, ex.Message);
+                return new CompilerResult(null, ex.Message, arguments);
             }
         }
 

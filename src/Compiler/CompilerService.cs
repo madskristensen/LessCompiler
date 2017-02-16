@@ -43,6 +43,8 @@ namespace LessCompiler
             CompilerResult result = await node.ExecuteProcess(lessFilePath, options.Arguments);
             sw.Stop();
 
+            Logger.Log($"Executed {result.Arguments}");
+
             if (result.HasError)
             {
                 Logger.Log(result.Error);
@@ -74,6 +76,13 @@ namespace LessCompiler
                 if (item?.ContainingProject != null)
                 {
                     VsHelpers.AddFileToProject(item.ContainingProject, options.OutputFilePath);
+
+                    string mapFilePath = Path.ChangeExtension(options.OutputFilePath, ".css.map");
+
+                    if (File.Exists(mapFilePath))
+                    {
+                        VsHelpers.AddNestedFile(options.OutputFilePath, mapFilePath);
+                    }
                 }
             }
 
