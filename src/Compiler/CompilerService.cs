@@ -4,11 +4,14 @@ using System;
 using System.IO;
 using Tasks = System.Threading.Tasks;
 using EnvDTE;
+using System.Diagnostics;
 
 namespace LessCompiler
 {
     internal class CompilerService
     {
+
+
         public static bool ShouldCompile(string lessFilePath)
         {
             // File name starts with a underscore
@@ -32,22 +35,38 @@ namespace LessCompiler
 
         public static async Tasks.Task Compile(string lessFilePath, NodeProcess node)
         {
-            string css = await node.ExecuteProcess(lessFilePath);
-            string cssFilePath = Path.ChangeExtension(lessFilePath, ".css");
+            var sw = new Stopwatch();
+            sw.Start();
+            CompilerResult result = await node.ExecuteProcess(lessFilePath);
+            sw.Stop();
 
-            bool exist = File.Exists(cssFilePath);
-
-            if (exist)
+            if (result.HasError)
             {
-                string oldCss = File.ReadAllText(cssFilePath);
-
-                if (oldCss == css)
-                    return;
+                Logger.Log(result.Error);
+                VsHelpers.WriteStatus($"Error compiling LESS file. See Output Window for details");
             }
+            else
+            {
+                string cssFilePath = Path.ChangeExtension(lessFilePath, ".css");
 
-            VsHelpers.CheckFileOutOfSourceControl(cssFilePath);
-            File.WriteAllText(cssFilePath, css);
-            VsHelpers.AddNestedFile(lessFilePath, cssFilePath);
+                bool exist = File.Exists(cssFilePath);
+
+                if (exist)
+                {
+                    string oldCss = File.ReadAllText(cssFilePath);
+
+                    if (oldCss == result.Output)
+                    {
+                        VsHelpers.WriteStatus("CSS file didn't change after compilation");
+                        return;
+                    }
+                }
+
+                VsHelpers.CheckFileOutOfSourceControl(cssFilePath);
+                File.WriteAllText(cssFilePath, result.Output);
+                VsHelpers.AddNestedFile(lessFilePath, cssFilePath);
+                VsHelpers.WriteStatus($"LESS file compiled in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
+            }
         }
 
         public static async Tasks.Task Install(NodeProcess node)

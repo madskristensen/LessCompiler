@@ -3,12 +3,21 @@ using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.IO;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace LessCompiler
 {
     public static class VsHelpers
     {
         public static DTE2 DTE = ServiceProvider.GlobalProvider.GetService(typeof(DTE)) as DTE2;
+        private static IVsStatusbar statusbar = (IVsStatusbar)ServiceProvider.GlobalProvider.GetService(typeof(SVsStatusbar));
+
+        public static void WriteStatus(string text)
+        {
+            statusbar.FreezeOutput(0);
+            statusbar.SetText(text);
+            statusbar.FreezeOutput(1);
+        }
 
         public static void CheckFileOutOfSourceControl(string file)
         {

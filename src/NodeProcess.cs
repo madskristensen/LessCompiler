@@ -71,19 +71,22 @@ namespace LessCompiler
             return success;
         }
 
-        public async Task<string> ExecuteProcess(string filePath)
+        public async Task<CompilerResult> ExecuteProcess(string filePath)
         {
             if (!await EnsurePackageInstalled())
                 return null;
 
             string fileName = Path.GetFileName(filePath);
 
-            var start = new ProcessStartInfo("cmd", $"/c \"\"{_executable}\" \"{fileName}\" --relative-urls --autoprefix=\">1%\" --csscomb=zen\"")
+            var start = new ProcessStartInfo("cmd", $"/c \"\"{_executable}\" \"{fileName}\" --no-color --relative-urls --autoprefix=\">1%\" --csscomb=zen\"")
             {
                 WorkingDirectory = Path.GetDirectoryName(filePath),
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                RedirectStandardOutput = true
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8,
             };
 
             ModifyPathVariable(start);
@@ -94,19 +97,18 @@ namespace LessCompiler
 
                 using (var proc = Process.Start(start))
                 {
-                    while (!proc.StandardOutput.EndOfStream)
-                    {
-                        string line = await proc.StandardOutput.ReadLineAsync();
-                        sb.AppendLine(line);
-                    }
+                    string output = await proc.StandardOutput.ReadToEndAsync();
+                    string error = await proc.StandardError.ReadToEndAsync();
 
-                    return sb.ToString();
+                    proc.WaitForExit();
+
+                    return new CompilerResult(output, error);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Log(ex);
-                return null;
+                return new CompilerResult(null, ex.Message);
             }
         }
 

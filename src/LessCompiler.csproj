@@ -49,6 +49,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Commands\CommandRegistration.cs" />
+    <Compile Include="Compiler\CompilerResult.cs" />
     <Compile Include="Compiler\CompilerService.cs" />
     <Compile Include="Helpers\Logger.cs" />
     <Compile Include="Helpers\VsHelpers.cs" />
