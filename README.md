@@ -71,6 +71,13 @@ This will produce a `.map` file next to the generated `.css` file. Be aware that
 
 See [Browserlist](https://github.com/ai/browserslist) for description on how to construct the value.
 
+#### CSSComb
+```less
+// lessc --csscomb=zen
+```
+
+Available values are `zen`, `yandex` and `csscomb`.
+
 #### Minification
 By default a `.min.css` file is generated, but that can be turned off by a comment containing `no-minify` in it. You can combine it with the compiler configuration like so:
 
