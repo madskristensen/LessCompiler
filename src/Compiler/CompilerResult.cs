@@ -2,14 +2,14 @@
 {
     public class CompilerResult
     {
-        public CompilerResult(string output, string error, string arguments)
+        public CompilerResult(string outputFile, string error, string arguments)
         {
-            Output = output;
+            OutputFile = outputFile;
             Error = error;
             Arguments = "lessc.cmd " + arguments;
         }
 
-        public string Output { get; }
+        public string OutputFile { get; set; }
         public string Error { get; }
         public string Arguments { get; }
 

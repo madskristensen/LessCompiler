@@ -8,13 +8,24 @@ namespace LessCompilerTest
     [TestClass]
     public class NodeProcessTest
     {
+        [TestCleanup]
+        public void Cleanup()
+        {
+            var dir = new DirectoryInfo("..\\..\\artifacts\\");
+
+            foreach (FileInfo cssFile in dir.GetFiles("*.css"))
+            {
+                cssFile.Delete();
+            }
+        }
+
         [TestMethod]
         public async Task AutoPrefix()
         {
             CompilerResult result = await Execute("autoprefix.less");
 
             Assert.IsFalse(result.HasError);
-            Assert.AreEqual("body {\n  -webkit-transition: ease;\n  -moz-transition: ease;\n  -o-transition: ease;\n  transition: ease;\n}\n", result.Output);
+            Assert.AreEqual("body {\n  -webkit-transition: ease;\n  -moz-transition: ease;\n  -o-transition: ease;\n  transition: ease;\n}\n", File.ReadAllText(result.OutputFile));
         }
 
         [TestMethod]
@@ -23,14 +34,23 @@ namespace LessCompilerTest
             CompilerResult result = await Execute("undefined-variable.less");
 
             Assert.IsTrue(result.HasError);
-            Assert.IsTrue(string.IsNullOrEmpty(result.Output));
+            Assert.IsFalse(File.Exists(result.OutputFile));
         }
 
-        private static async Task<CompilerResult> Execute(string fileName, string args = "--no-color --relative-urls --autoprefix=\">0%\" --csscomb=zen")
+        [TestMethod]
+        public async Task SourceMap()
+        {
+            CompilerResult result = await Execute("sourcemap.less");
+
+            Assert.IsTrue(!result.HasError);
+        }
+
+        private static async Task<CompilerResult> Execute(string fileName)
         {
             var less = new FileInfo("..\\..\\artifacts\\" + fileName);
+            var options = new CompilerOptions(less.FullName);
             var node = new NodeProcess();
-            return await node.ExecuteProcess(less.FullName, args);
+            return await node.ExecuteProcess(options);
         }
     }
 }

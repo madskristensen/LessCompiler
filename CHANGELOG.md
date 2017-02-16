@@ -4,7 +4,7 @@
 - [x] Add unit tests
 - [x] Support minification
 - [x] Support source maps
-- [x] Allows spaces in output file names
+- [x] Allow spaces in output file names
 
 Features that have a checkmark are complete and available for
 download in the

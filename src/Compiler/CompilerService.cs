@@ -1,13 +1,13 @@
 ﻿using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using NUglify;
+using NUglify.Css;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Tasks = System.Threading.Tasks;
-using NUglify;
-using NUglify.Css;
 
 namespace LessCompiler
 {
@@ -15,7 +15,7 @@ namespace LessCompiler
     {
         public static CompilerOptions GetOptions(string lessFilePath, string lessContent = null)
         {
-            var options = new CompilerOptions();
+            var options = new CompilerOptions(lessFilePath);
 
             // File name starts with a underscore
             if (Path.GetFileName(lessFilePath).StartsWith("_", StringComparison.Ordinal))
@@ -23,83 +23,83 @@ namespace LessCompiler
 
             // File is not part of a project
             ProjectItem projectItem = VsHelpers.DTE.Solution.FindProjectItem(lessFilePath);
-
             if (projectItem == null || projectItem.ContainingProject == null)
                 return options;
 
             return CompilerOptions.Parse(lessFilePath, lessContent);
         }
 
-        public static async Tasks.Task Compile(string lessFilePath, NodeProcess node, CompilerOptions options)
+        public static async Tasks.Task Compile(NodeProcess node, CompilerOptions options)
         {
-            if (!options.Compile)
+            if (node == null || options == null || !options.Compile)
                 return;
 
-            if (!options.WriteToDisk)
-                VsHelpers.CheckFileOutOfSourceControl(options.OutputFilePath);
-
-            var sw = new Stopwatch();
-            sw.Start();
-            CompilerResult result = await node.ExecuteProcess(lessFilePath, options.Arguments);
-            sw.Stop();
-
-            Logger.Log($"Executed {result.Arguments}");
-
-            if (result.HasError)
+            try
             {
-                Logger.Log(result.Error);
+                VsHelpers.CheckFileOutOfSourceControl(options.OutputFilePath);
+                VsHelpers.CheckFileOutOfSourceControl(options.OutputFilePath + ".map");
+
+                var sw = new Stopwatch();
+                sw.Start();
+                CompilerResult result = await node.ExecuteProcess(options);
+                sw.Stop();
+
+                Logger.Log($"> {result.Arguments}");
+
+                if (result.HasError)
+                {
+                    Logger.Log(result.Error);
+                    VsHelpers.WriteStatus($"Error compiling LESS file. See Output Window for details");
+                }
+                else
+                {
+                    AddFilesToProject(options);
+
+                    if (options.Minify)
+                    {
+                        Minify(options.OutputFilePath);
+                    }
+                }
+
+                VsHelpers.WriteStatus($"LESS file compiled in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(ex);
                 VsHelpers.WriteStatus($"Error compiling LESS file. See Output Window for details");
             }
-            else if (options.WriteToDisk)
-            {
-                bool exist = File.Exists(options.OutputFilePath);
-
-                if (exist)
-                {
-                    string existingCssFile = File.ReadAllText(options.OutputFilePath);
-
-                    if (existingCssFile == result.Output)
-                    {
-                        VsHelpers.WriteStatus("CSS file didn't change after compilation");
-                        return;
-                    }
-                }
-
-                VsHelpers.CheckFileOutOfSourceControl(options.OutputFilePath);
-                File.WriteAllText(options.OutputFilePath, result.Output, new UTF8Encoding(true));
-                VsHelpers.AddNestedFile(lessFilePath, options.OutputFilePath);
-            }
-            else if (!options.WriteToDisk)
-            {
-                ProjectItem item = VsHelpers.DTE.Solution.FindProjectItem(lessFilePath);
-
-                if (item?.ContainingProject != null)
-                {
-                    VsHelpers.AddFileToProject(item.ContainingProject, options.OutputFilePath);
-
-                    string mapFilePath = Path.ChangeExtension(options.OutputFilePath, ".css.map");
-
-                    if (File.Exists(mapFilePath))
-                    {
-                        VsHelpers.AddNestedFile(options.OutputFilePath, mapFilePath);
-                    }
-                }
-            }
-
-            if (options.Minify)
-            {
-                Minify(options.OutputFilePath, result.Output);
-            }
-
-            VsHelpers.WriteStatus($"LESS file compiled in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
         }
 
-        public static void Minify(string cssFilePath, string cssContent = null)
+        private static void AddFilesToProject(CompilerOptions options)
         {
-            if (string.IsNullOrEmpty(cssContent))
+            ProjectItem item = VsHelpers.DTE.Solution.FindProjectItem(options.InputFilePath);
+
+            if (item?.ContainingProject != null)
             {
-                cssContent = File.ReadAllText(cssFilePath);
+                if (options.OutputFilePath == Path.ChangeExtension(options.InputFilePath, ".css"))
+                {
+                    VsHelpers.AddNestedFile(options.InputFilePath, options.OutputFilePath);
+                }
+                else
+                {
+                    VsHelpers.AddFileToProject(item.ContainingProject, options.OutputFilePath);
+                }
+
+                string mapFilePath = Path.ChangeExtension(options.OutputFilePath, ".css.map");
+
+                if (File.Exists(mapFilePath))
+                {
+                    VsHelpers.AddNestedFile(options.OutputFilePath, mapFilePath);
+                }
             }
+        }
+
+        public static void Minify(string cssFilePath)
+        {
+            if (!File.Exists(cssFilePath))
+                return;
+
+            string cssContent = File.ReadAllText(cssFilePath);
 
             var settings = new CssSettings
             {

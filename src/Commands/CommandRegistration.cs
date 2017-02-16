@@ -46,7 +46,7 @@ namespace LessCompiler
             if (_node != null && _node.IsReadyToExecute())
             {
                 CompilerOptions options = CompilerService.GetOptions(e.FilePath, _view.TextBuffer.CurrentSnapshot.GetText());
-                await CompilerService.Compile(e.FilePath, _node, options);
+                await CompilerService.Compile(_node, options);
             }
         }
     }

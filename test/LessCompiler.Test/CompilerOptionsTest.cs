@@ -21,7 +21,7 @@ namespace LessCompilerTest
         {
             var args = CompilerOptions.Parse(_lessFilePath, "// lessc --compress --csscomb=yandex --autoprefix=\">1%\"");
 
-            Assert.AreEqual("--compress --csscomb=yandex --autoprefix=\">1%\"", args.Arguments);
+            Assert.AreEqual("\"foo.less\" --compress --csscomb=yandex --autoprefix=\">1%\" \"foo.css\"", args.Arguments);
         }
 
         [TestMethod]
@@ -29,8 +29,7 @@ namespace LessCompilerTest
         {
             var options = CompilerOptions.Parse(_lessFilePath, "/* lessc -x out/hat.css */");
 
-            Assert.AreEqual("-x out/hat.css", options.Arguments);
-            Assert.IsFalse(options.WriteToDisk);
+            Assert.AreEqual("\"foo.less\" -x out/hat.css", options.Arguments);
             Assert.AreEqual(options.OutputFilePath, Path.Combine(Path.GetDirectoryName(_lessFilePath), "out\\hat.css"));
         }
 
@@ -39,8 +38,7 @@ namespace LessCompilerTest
         {
             var options = CompilerOptions.Parse(_lessFilePath, "/* no-compile no-minify */");
 
-            Assert.AreEqual(CompilerOptions.DefaultArugments, options.Arguments);
-            Assert.IsTrue(options.WriteToDisk);
+            Assert.AreEqual("\"foo.less\" --relative-urls --autoprefix=\">0%\" --csscomb=zen \"foo.css\"", options.Arguments);
             Assert.AreEqual(options.OutputFilePath, Path.ChangeExtension(_lessFilePath, ".css"));
             Assert.IsFalse(options.Compile);
             Assert.IsFalse(options.Minify);
@@ -51,8 +49,7 @@ namespace LessCompilerTest
         {
             var options = CompilerOptions.Parse(_lessFilePath, "/* no-compile no-minify lessc -ru */");
 
-            Assert.AreEqual("-ru", options.Arguments);
-            Assert.IsTrue(options.WriteToDisk);
+            Assert.AreEqual("\"foo.less\" -ru \"foo.css\"", options.Arguments);
             Assert.AreEqual(options.OutputFilePath, Path.ChangeExtension(_lessFilePath, ".css"));
             Assert.IsFalse(options.Compile);
             Assert.IsFalse(options.Minify);
@@ -63,7 +60,6 @@ namespace LessCompilerTest
         {
             var options = CompilerOptions.Parse(_lessFilePath, "/* lessc out.css */");
 
-            Assert.IsFalse(options.WriteToDisk);
             Assert.AreEqual(options.OutputFilePath, Path.Combine(Path.GetDirectoryName(_lessFilePath), "out.css"));
             Assert.IsTrue(options.Compile);
             Assert.IsTrue(options.Minify);
@@ -72,10 +68,19 @@ namespace LessCompilerTest
         [TestMethod]
         public void OutFileWithSpaces()
         {
-            var options = CompilerOptions.Parse(_lessFilePath, "/* lessc \"out file.css\" */");
+            var options = CompilerOptions.Parse(_lessFilePath, "/* lessc --source-map=foo.css.map \"out file.css\" */");
 
-            Assert.IsFalse(options.WriteToDisk);
             Assert.AreEqual(options.OutputFilePath, Path.Combine(Path.GetDirectoryName(_lessFilePath), "out file.css"));
+            Assert.IsTrue(options.Compile);
+            Assert.IsTrue(options.Minify);
+        }
+
+        [TestMethod]
+        public void SourceMapOnly()
+        {
+            var options = CompilerOptions.Parse(_lessFilePath, "/* lessc --source-map=foo.css.map */");
+
+            Assert.AreEqual(options.OutputFilePath, Path.ChangeExtension(_lessFilePath, ".css"));
             Assert.IsTrue(options.Compile);
             Assert.IsTrue(options.Minify);
         }

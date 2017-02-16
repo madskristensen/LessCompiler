@@ -71,22 +71,22 @@ namespace LessCompiler
             return success;
         }
 
-        public async Task<CompilerResult> ExecuteProcess(string filePath, string args)
+        public async Task<CompilerResult> ExecuteProcess(CompilerOptions options)
         {
             if (!await EnsurePackageInstalled())
                 return null;
 
-            string fileName = Path.GetFileName(filePath);
-            string arguments = $"\"{fileName}\" --no-color {args}";
+            string fileName = Path.GetFileName(options.InputFilePath);
+            string arguments = $"--no-color {options.Arguments}";
+
+            Directory.CreateDirectory(Path.GetDirectoryName(options.OutputFilePath));
 
             var start = new ProcessStartInfo("cmd", $"/c \"\"{_executable}\" {arguments}\"")
             {
-                WorkingDirectory = Path.GetDirectoryName(filePath),
+                WorkingDirectory = Path.GetDirectoryName(options.InputFilePath),
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                StandardOutputEncoding = Encoding.UTF8,
                 StandardErrorEncoding = Encoding.UTF8,
             };
 
@@ -94,22 +94,19 @@ namespace LessCompiler
 
             try
             {
-                var sb = new StringBuilder();
-
                 using (var proc = Process.Start(start))
                 {
-                    string output = await proc.StandardOutput.ReadToEndAsync();
                     string error = await proc.StandardError.ReadToEndAsync();
 
                     proc.WaitForExit();
 
-                    return new CompilerResult(output, error, arguments);
+                    return new CompilerResult(options.OutputFilePath, error, arguments);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Log(ex);
-                return new CompilerResult(null, ex.Message, arguments);
+                return new CompilerResult(options.OutputFilePath, ex.Message, arguments);
             }
         }
 

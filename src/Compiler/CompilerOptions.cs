@@ -6,21 +6,30 @@ namespace LessCompiler
 {
     public class CompilerOptions
     {
-        internal const string DefaultArugments = "--no-color --ru --autoprefix=\">0%\" --csscomb=zen";
-
         private static Regex _regex = new Regex(@"\slessc(?<args>\s.+)(\*/)?", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        private static Regex _outFile = new Regex(@"\s((?:""|')(?<out>.+\.css)(?:""|')|(?<out>[^\s]+\.css))", RegexOptions.Compiled);
+        private static Regex _outFile = new Regex(@"\s((?:""|')(?<out>.+\.css)(?:""|')|(?<out>[^\s=]+\.css))", RegexOptions.Compiled);
 
+        public CompilerOptions(string lessFilePath)
+        {
+            InputFilePath = lessFilePath;
+            OutputFilePath = Path.ChangeExtension(lessFilePath, ".css");
+
+            string inFile = Path.GetFileName(InputFilePath);
+            string outFile = Path.GetFileName(OutputFilePath);
+
+            Arguments = $"\"{inFile}\" --relative-urls --autoprefix=\">0%\" --csscomb=zen \"{outFile}\"";
+        }
+
+        public string InputFilePath { get; set; }
         public string OutputFilePath { get; set; }
-        public string Arguments { get; set; } = DefaultArugments;
+        public string Arguments { get; set; }
         public bool Minify { get; set; }
         public bool Compile { get; set; }
-        public bool WriteToDisk { get; private set; } = true;
 
         public static CompilerOptions Parse(string lessFilePath, string lessContent = null)
         {
             lessContent = lessContent ?? File.ReadAllText(lessFilePath);
-            var options = new CompilerOptions();
+            var options = new CompilerOptions(lessFilePath);
 
             // Compile
             if (lessContent.IndexOf("no-compile", StringComparison.OrdinalIgnoreCase) == -1)
@@ -34,19 +43,25 @@ namespace LessCompiler
             Match argsMatch = _regex.Match(lessContent, 0, Math.Min(500, lessContent.Length));
             if (argsMatch.Success)
             {
-                options.Arguments = argsMatch.Groups["args"].Value.TrimEnd('*', '/');
+                string inFile = Path.GetFileName(options.InputFilePath);
+                options.Arguments = $"\"{inFile}\" {argsMatch.Groups["args"].Value.TrimEnd('*', '/').Trim()}";
             }
 
             // OutputFileName
             Match outMatch = _outFile.Match(options.Arguments);
             if (argsMatch.Success && outMatch.Success)
             {
-                options.OutputFilePath = Path.Combine(Path.GetDirectoryName(lessFilePath), outMatch.Groups["out"].Value.Replace("/", "\\"));
-                options.WriteToDisk = false;
+                string relative = outMatch.Groups["out"].Value.Replace("/", "\\");
+                options.OutputFilePath = Path.Combine(Path.GetDirectoryName(lessFilePath), relative);
             }
             else
             {
                 options.OutputFilePath = Path.ChangeExtension(lessFilePath, ".css");
+
+                if (argsMatch.Success)
+                {
+                    options.Arguments += $" \"{Path.GetFileName(options.OutputFilePath)}\"";
+                }
             }
 
             // Trim the argument list
