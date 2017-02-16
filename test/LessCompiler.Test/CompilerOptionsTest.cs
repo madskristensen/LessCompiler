@@ -11,7 +11,7 @@ namespace LessCompilerTest
         [TestMethod]
         public void OverrideDefaults()
         {
-            string args = CompilerOptions.Parse("// less: --compress --csscomb=yandex --autoprefix=\">1%\"");
+            string args = CompilerOptions.Parse("// lessc --compress --csscomb=yandex --autoprefix=\">1%\"");
 
             Assert.AreEqual("--no-color --relative-urls --compress --csscomb=yandex --autoprefix=\">1%\"", args);
         }
@@ -19,7 +19,7 @@ namespace LessCompilerTest
         [TestMethod]
         public void ShorthandSyntax()
         {
-            string args = CompilerOptions.Parse("/* less: -x out/hat.css */");
+            string args = CompilerOptions.Parse("/* lessc -x out/hat.css */");
 
             Assert.AreEqual("--no-color --relative-urls --autoprefix=\">0%\" --csscomb=zen -x out/hat.css", args);
         }

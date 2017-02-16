@@ -7,7 +7,7 @@ namespace LessCompiler
 {
     public class CompilerOptions
     {
-        private static Regex _regex = new Regex(@"(^|//|/\*)\s*less\s*:(?<args>.+)(\*/)?$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private static Regex _regex = new Regex(@"(^|//|/\*)\s*lessc(?<args>.+)(\*/)?$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
         private static List<string> _defaults = new List<string>
         {
