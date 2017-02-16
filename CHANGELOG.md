@@ -1,7 +1,7 @@
 # Road map
 
-- [ ] Configurable options per file
-- [ ] Add unit tests
+- [x] Configurable options per file
+- [x] Add unit tests
 - [ ] Add `Generated` wartermark on compiled .css file
 
 Features that have a checkmark are complete and available for

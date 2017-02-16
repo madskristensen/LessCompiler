@@ -71,14 +71,14 @@ namespace LessCompiler
             return success;
         }
 
-        public async Task<CompilerResult> ExecuteProcess(string filePath)
+        public async Task<CompilerResult> ExecuteProcess(string filePath, string args)
         {
             if (!await EnsurePackageInstalled())
                 return null;
 
             string fileName = Path.GetFileName(filePath);
 
-            var start = new ProcessStartInfo("cmd", $"/c \"\"{_executable}\" \"{fileName}\" --no-color --relative-urls --autoprefix=\">1%\" --csscomb=zen\"")
+            var start = new ProcessStartInfo("cmd", $"/c \"\"{_executable}\" \"{fileName}\" {args}\"")
             {
                 WorkingDirectory = Path.GetDirectoryName(filePath),
                 UseShellExecute = false,

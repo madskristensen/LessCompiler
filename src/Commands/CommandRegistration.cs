@@ -13,6 +13,7 @@ namespace LessCompiler
     internal sealed class CommandRegistration : IVsTextViewCreationListener
     {
         private NodeProcess _node;
+        private IWpfTextView _view;
 
         [Import]
         private IVsEditorAdaptersFactoryService AdaptersFactory { get; set; }
@@ -22,14 +23,14 @@ namespace LessCompiler
 
         public async void VsTextViewCreated(IVsTextView textViewAdapter)
         {
-            IWpfTextView view = AdaptersFactory.GetWpfTextView(textViewAdapter);
+            _view = AdaptersFactory.GetWpfTextView(textViewAdapter);
 
-            if (!DocumentService.TryGetTextDocument(view.TextBuffer, out ITextDocument doc))
+            if (!DocumentService.TryGetTextDocument(_view.TextBuffer, out ITextDocument doc))
                 return;
 
             doc.FileActionOccurred += DocumentSaved;
 
-            _node = view.Properties.GetOrCreateSingletonProperty(() => new NodeProcess());
+            _node = _view.Properties.GetOrCreateSingletonProperty(() => new NodeProcess());
 
             if (!_node.IsReadyToExecute())
             {
@@ -44,7 +45,8 @@ namespace LessCompiler
 
             if (_node != null && CompilerService.ShouldCompile(e.FilePath) && _node.IsReadyToExecute())
             {
-                await CompilerService.Compile(e.FilePath, _node);
+                string options = CompilerOptions.Parse(_view.TextBuffer.CurrentSnapshot.GetText());
+                await CompilerService.Compile(e.FilePath, _node, options);
             }
         }
     }

@@ -6,13 +6,12 @@ using Tasks = System.Threading.Tasks;
 using EnvDTE;
 using System.Diagnostics;
 using System.Text;
+using System.Collections.Generic;
 
 namespace LessCompiler
 {
     internal class CompilerService
     {
-
-
         public static bool ShouldCompile(string lessFilePath)
         {
             // File name starts with a underscore
@@ -34,11 +33,11 @@ namespace LessCompiler
             return true;
         }
 
-        public static async Tasks.Task Compile(string lessFilePath, NodeProcess node)
+        public static async Tasks.Task Compile(string lessFilePath, NodeProcess node, string args)
         {
             var sw = new Stopwatch();
             sw.Start();
-            CompilerResult result = await node.ExecuteProcess(lessFilePath);
+            CompilerResult result = await node.ExecuteProcess(lessFilePath, args);
             sw.Stop();
 
             if (result.HasError)

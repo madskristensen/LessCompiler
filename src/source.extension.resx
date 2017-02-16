@@ -121,7 +121,7 @@
     <value>LESS Compiler</value>
   </data>
   <data name="112" xml:space="preserve">
-    <value>An alternative LESS compiler with little to no setup. Uses the node.js based LESS compiler under the hood with AutoPrefixer and CSSComb built in.</value>
+    <value>An alternative LESS compiler with no setup. Uses the official node.js based LESS compiler under the hood with AutoPrefixer and CSSComb built in.</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="400" type="System.Resources.ResXFileRef, System.Windows.Forms">
