@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -7,38 +8,50 @@ namespace LessCompiler
 {
     public class CompilerOptions
     {
-        private static Regex _regex = new Regex(@"(^|//|/\*)\s*lessc(?<args>.+)(\*/)?$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        internal const string DefaultArugments = "--no-color --ru --autoprefix=\">0%\" --csscomb=zen";
 
-        private static List<string> _defaults = new List<string>
-        {
-            "--no-color",
-            "--relative-urls",
-            "--autoprefix=\">0%\"",
-            "--csscomb=zen",
-        };
+        private static Regex _regex = new Regex(@"\slessc\s(?<args>.+)(\*/)?", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private static Regex _outFile = new Regex(@"\s(?<out>[^\s]+\.css)", RegexOptions.Compiled);
 
-        public static string Parse(string lessContent)
+        public string OutputFilePath { get; set; }
+        public string Arguments { get; set; } = DefaultArugments;
+        public bool Minify { get; set; }
+        public bool Compile { get; set; }
+        public bool WriteToDisk { get; private set; } = true;
+
+        public static CompilerOptions Parse(string lessFilePath, string lessContent = null)
         {
+            lessContent = lessContent ?? File.ReadAllText(lessFilePath);
+            var options = new CompilerOptions();
+
+            // Compile
+            if (lessContent.IndexOf("no-compile", StringComparison.OrdinalIgnoreCase) == -1)
+                options.Compile = true;
+
+            // Minify
+            if (lessContent.IndexOf("no-minify", StringComparison.OrdinalIgnoreCase) == -1)
+                options.Minify = true;
+
+            // Arguments
             Match match = _regex.Match(lessContent, 0, Math.Min(500, lessContent.Length));
-            var list = new List<string>(_defaults);
-
             if (match.Success)
             {
-                string[] args = match.Groups["args"].Value.Split(new[] { " -" }, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (string arg in args)
-                {
-                    string[] pair = arg.Split('=');
-                    string existing = list.FirstOrDefault(a => a.StartsWith("-" + pair[0]));
-
-                    if (existing != null)
-                        list.Remove(existing);
-
-                    list.Add("-" + arg.Trim());
-                }
+                options.Arguments = match.Groups["args"].Value.Trim().TrimEnd('*', '/').TrimEnd();
             }
 
-            return string.Join(" ", list).TrimEnd('/', '*', ' ');
+            // OutputFileName
+            Match outMatch = _outFile.Match(options.Arguments);
+            if (outMatch.Success)
+            {
+                options.OutputFilePath = Path.Combine(Path.GetDirectoryName(lessFilePath), outMatch.Groups["out"].Value.Replace("/", "\\"));
+                options.WriteToDisk = false;
+            }
+            else
+            {
+                options.OutputFilePath = Path.ChangeExtension(lessFilePath, ".css");
+            }
+
+            return options;
         }
     }
 }

@@ -1,43 +1,44 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using EnvDTE;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
-using System.IO;
-using Tasks = System.Threading.Tasks;
-using EnvDTE;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
-using System.Collections.Generic;
+using Tasks = System.Threading.Tasks;
 
 namespace LessCompiler
 {
     internal class CompilerService
     {
-        public static bool ShouldCompile(string lessFilePath)
+        public static CompilerOptions GetOptions(string lessFilePath, string lessContent = null)
         {
+            var options = new CompilerOptions();
+
             // File name starts with a underscore
             if (Path.GetFileName(lessFilePath).StartsWith("_", StringComparison.Ordinal))
-                return false;
+                return options;
 
             // File is not part of a project
             ProjectItem projectItem = VsHelpers.DTE.Solution.FindProjectItem(lessFilePath);
 
             if (projectItem == null || projectItem.ContainingProject == null)
-                return false;
+                return options;
 
-            // A comment with "nocompile" is found
-            string less = File.ReadAllText(lessFilePath);
-
-            if (less.IndexOf("nocompile", StringComparison.OrdinalIgnoreCase) > -1)
-                return false;
-
-            return true;
+            return CompilerOptions.Parse(lessFilePath, lessContent);
         }
 
-        public static async Tasks.Task Compile(string lessFilePath, NodeProcess node, string args)
+        public static async Tasks.Task Compile(string lessFilePath, NodeProcess node, CompilerOptions options)
         {
+            if (!options.Compile)
+                return;
+
+            if (!options.WriteToDisk)
+                VsHelpers.CheckFileOutOfSourceControl(options.OutputFilePath);
+
             var sw = new Stopwatch();
             sw.Start();
-            CompilerResult result = await node.ExecuteProcess(lessFilePath, args);
+            CompilerResult result = await node.ExecuteProcess(lessFilePath, options.Arguments);
             sw.Stop();
 
             if (result.HasError)
@@ -45,15 +46,13 @@ namespace LessCompiler
                 Logger.Log(result.Error);
                 VsHelpers.WriteStatus($"Error compiling LESS file. See Output Window for details");
             }
-            else
+            else if (options.WriteToDisk)
             {
-                string cssFilePath = Path.ChangeExtension(lessFilePath, ".css");
-
-                bool exist = File.Exists(cssFilePath);
+                bool exist = File.Exists(options.OutputFilePath);
 
                 if (exist)
                 {
-                    string oldCss = File.ReadAllText(cssFilePath);
+                    string oldCss = File.ReadAllText(options.OutputFilePath);
 
                     if (oldCss == result.Output)
                     {
@@ -62,11 +61,17 @@ namespace LessCompiler
                     }
                 }
 
-                VsHelpers.CheckFileOutOfSourceControl(cssFilePath);
-                File.WriteAllText(cssFilePath, result.Output, new UTF8Encoding(true));
-                VsHelpers.AddNestedFile(lessFilePath, cssFilePath);
-                VsHelpers.WriteStatus($"LESS file compiled in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
+                VsHelpers.CheckFileOutOfSourceControl(options.OutputFilePath);
+                File.WriteAllText(options.OutputFilePath, result.Output, new UTF8Encoding(true));
+                VsHelpers.AddNestedFile(lessFilePath, options.OutputFilePath);
             }
+
+            VsHelpers.WriteStatus($"LESS file compiled in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
+        }
+
+        public static void Minify(string cssFilePath)
+        {
+
         }
 
         public static async Tasks.Task Install(NodeProcess node)

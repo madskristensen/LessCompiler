@@ -43,9 +43,9 @@ namespace LessCompiler
             if (e.FileActionType != FileActionTypes.ContentSavedToDisk)
                 return;
 
-            if (_node != null && CompilerService.ShouldCompile(e.FilePath) && _node.IsReadyToExecute())
+            if (_node != null && _node.IsReadyToExecute())
             {
-                string options = CompilerOptions.Parse(_view.TextBuffer.CurrentSnapshot.GetText());
+                CompilerOptions options = CompilerService.GetOptions(e.FilePath, _view.TextBuffer.CurrentSnapshot.GetText());
                 await CompilerService.Compile(e.FilePath, _node, options);
             }
         }
