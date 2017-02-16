@@ -3,7 +3,7 @@
   <Metadata>
     <Identity Id="d32c5250-fa82-4da6-9732-5518fabebfef" Version="0.6" Language="en-US" Publisher="Mads Kristensen" />
     <DisplayName>LESS Compiler</DisplayName>
-    <Description xml:space="preserve">An alternative LESS compiler with little to no setup. Uses the node.js based LESS compiler under the hood with AutoPrefixer and CSSComb built in.</Description>
+    <Description xml:space="preserve">An alternative LESS compiler with no setup. Uses the official node.js based LESS compiler under the hood with AutoPrefixer and CSSComb built in.</Description>
     <MoreInfo>https://github.com/madskristensen/LessCompiler</MoreInfo>
     <License>Resources\LICENSE</License>
     <ReleaseNotes>https://github.com/madskristensen/LessCompiler/blob/master/CHANGELOG.md</ReleaseNotes>
