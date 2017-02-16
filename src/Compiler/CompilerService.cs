@@ -5,6 +5,7 @@ using System.IO;
 using Tasks = System.Threading.Tasks;
 using EnvDTE;
 using System.Diagnostics;
+using System.Text;
 
 namespace LessCompiler
 {
@@ -63,7 +64,7 @@ namespace LessCompiler
                 }
 
                 VsHelpers.CheckFileOutOfSourceControl(cssFilePath);
-                File.WriteAllText(cssFilePath, result.Output);
+                File.WriteAllText(cssFilePath, result.Output, new UTF8Encoding(true));
                 VsHelpers.AddNestedFile(lessFilePath, cssFilePath);
                 VsHelpers.WriteStatus($"LESS file compiled in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
             }
