@@ -32,8 +32,9 @@ namespace LessCompiler
             var options = new CompilerOptions(lessFilePath);
 
             // Compile
-            if (lessContent.IndexOf("no-compile", StringComparison.OrdinalIgnoreCase) == -1)
-                options.Compile = true;
+            if (!Path.GetFileName(lessFilePath).StartsWith("_", StringComparison.Ordinal))
+                if (lessContent.IndexOf("no-compile", StringComparison.OrdinalIgnoreCase) == -1)
+                    options.Compile = true;
 
             // Minify
             if (lessContent.IndexOf("no-minify", StringComparison.OrdinalIgnoreCase) == -1)

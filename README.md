@@ -38,16 +38,12 @@ You can set any compiler options as defined on the [LESS compiler website](http:
 
 ```less
 // lessc --strict-math=on
-
-body {
-  margin: 0.3px * 4px;
-}
 ```
 
 The default less compiler arguments are:
 
 ```bash
-lessc "<file.less>" --relative-urls --autoprefix="> 0%" --csscomb=zen "<file.css>"
+lessc --relative-urls --autoprefix="> 0%" --csscomb=zen "<file.css>"
 ```
 
 Here are some examples of the code comments to use in the `.less` files:

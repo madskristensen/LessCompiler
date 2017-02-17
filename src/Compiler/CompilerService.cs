@@ -11,23 +11,20 @@ namespace LessCompiler
 {
     internal class CompilerService
     {
-        public static CompilerOptions GetOptions(string lessFilePath, string lessContent = null)
+        public static async Tasks.Task CompileProjectAsync(Project project)
         {
-            var options = new CompilerOptions(lessFilePath);
+            if (!LessCatalog.Catalog.ContainsKey(project.UniqueName))
+                return;
 
-            // File name starts with a underscore
-            if (Path.GetFileName(lessFilePath).StartsWith("_", StringComparison.Ordinal))
-                return options;
+            CompilerOptions[] options = LessCatalog.Catalog[project.UniqueName].ToArray();
 
-            // File is not part of a project
-            ProjectItem projectItem = VsHelpers.DTE.Solution.FindProjectItem(lessFilePath);
-            if (projectItem == null || projectItem.ContainingProject == null)
-                return options;
-
-            return CompilerOptions.Parse(lessFilePath, lessContent);
+            foreach (CompilerOptions option in options)
+            {
+                await CompileAsync(option);
+            }
         }
 
-        public static async Tasks.Task Compile(CompilerOptions options)
+        public static async Tasks.Task CompileAsync(CompilerOptions options)
         {
             if (options == null || !options.Compile)
                 return;

@@ -1,9 +1,11 @@
-﻿using Microsoft.VisualStudio.Editor;
+﻿using EnvDTE;
+using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
+using System.IO;
 
 namespace LessCompiler
 {
@@ -13,6 +15,7 @@ namespace LessCompiler
     internal sealed class CommandRegistration : IVsTextViewCreationListener
     {
         private IWpfTextView _view;
+        private ProjectItem _projectItem;
 
         [Import]
         private IVsEditorAdaptersFactoryService AdaptersFactory { get; set; }
@@ -20,14 +23,21 @@ namespace LessCompiler
         [Import]
         private ITextDocumentFactoryService DocumentService { get; set; }
 
-        public void VsTextViewCreated(IVsTextView textViewAdapter)
+        public async void VsTextViewCreated(IVsTextView textViewAdapter)
         {
             _view = AdaptersFactory.GetWpfTextView(textViewAdapter);
 
             if (!DocumentService.TryGetTextDocument(_view.TextBuffer, out ITextDocument doc))
                 return;
 
-            doc.FileActionOccurred += DocumentSaved;
+            string fileName = Path.GetFileName(doc.FilePath);
+            _projectItem = VsHelpers.DTE.Solution.FindProjectItem(doc.FilePath);
+
+            if (_projectItem?.ContainingProject != null)
+            {
+                await LessCatalog.EnsureCatalog(_projectItem.ContainingProject);
+                doc.FileActionOccurred += DocumentSaved;
+            }
         }
 
         private async void DocumentSaved(object sender, TextDocumentFileActionEventArgs e)
@@ -41,8 +51,17 @@ namespace LessCompiler
             }
             else if (NodeProcess.IsReadyToExecute())
             {
-                CompilerOptions options = CompilerService.GetOptions(e.FilePath, _view.TextBuffer.CurrentSnapshot.GetText());
-                await CompilerService.Compile(options);
+                var options = CompilerOptions.Parse(e.FilePath, _view.TextBuffer.CurrentSnapshot.GetText());
+
+                if (options.Compile)
+                {
+                    LessCatalog.UpdateCatalog(_projectItem, options);
+                    await CompilerService.CompileAsync(options);
+                }
+                else
+                {
+                    await CompilerService.CompileProjectAsync(_projectItem.ContainingProject);
+                }
             }
         }
     }

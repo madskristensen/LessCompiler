@@ -21,7 +21,7 @@ namespace LessCompiler
 
         public static bool IsReadyToExecute()
         {
-            return File.Exists(_executable);
+            return !IsInstalling && File.Exists(_executable);
         }
 
         public static async Task<bool> EnsurePackageInstalled()
@@ -64,7 +64,7 @@ namespace LessCompiler
                      using (var proc = Process.Start(start))
                      {
                          string output = await proc.StandardOutput.ReadToEndAsync();
-                         string error = await proc.StandardOutput.ReadToEndAsync();
+                         string error = await proc.StandardError.ReadToEndAsync();
 
                          proc.WaitForExit();
 
