@@ -12,7 +12,6 @@ namespace LessCompiler
     [TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
     internal sealed class CommandRegistration : IVsTextViewCreationListener
     {
-        private NodeProcess _node;
         private IWpfTextView _view;
 
         [Import]
@@ -30,11 +29,9 @@ namespace LessCompiler
 
             doc.FileActionOccurred += DocumentSaved;
 
-            _node = _view.Properties.GetOrCreateSingletonProperty(() => new NodeProcess());
-
-            if (!_node.IsReadyToExecute())
+            if (!NodeProcess.IsReadyToExecute())
             {
-                await CompilerService.Install(_node);
+                await CompilerService.Install();
             }
         }
 
@@ -43,10 +40,10 @@ namespace LessCompiler
             if (e.FileActionType != FileActionTypes.ContentSavedToDisk)
                 return;
 
-            if (_node != null && _node.IsReadyToExecute())
+            if (NodeProcess.IsReadyToExecute())
             {
                 CompilerOptions options = CompilerService.GetOptions(e.FilePath, _view.TextBuffer.CurrentSnapshot.GetText());
-                await CompilerService.Compile(_node, options);
+                await CompilerService.Compile(options);
             }
         }
     }

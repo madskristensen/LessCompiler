@@ -1,10 +1,8 @@
 # Road map
 
-- [x] Configurable options per file
-- [x] Add unit tests
-- [x] Support minification
-- [x] Support source maps
-- [x] Allow spaces in output file names
+- [x] Install npm modules when VS starts
+- [ ] Use IvsRunningDocumentTable for the save event
+- [ ] Alert when the npm modules are being installed when .less file is saved
 
 Features that have a checkmark are complete and available for
 download in the
@@ -14,6 +12,14 @@ download in the
 
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
+
+## 0.7
+
+- [x] Configurable options per file
+- [x] Add unit tests
+- [x] Support minification
+- [x] Support source maps
+- [x] Allow spaces in output file names
 
 ## 0.6
 

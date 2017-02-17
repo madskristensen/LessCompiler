@@ -29,9 +29,9 @@ namespace LessCompiler
             return CompilerOptions.Parse(lessFilePath, lessContent);
         }
 
-        public static async Tasks.Task Compile(NodeProcess node, CompilerOptions options)
+        public static async Tasks.Task Compile(CompilerOptions options)
         {
-            if (node == null || options == null || !options.Compile)
+            if (options == null || !options.Compile)
                 return;
 
             try
@@ -41,7 +41,7 @@ namespace LessCompiler
 
                 var sw = new Stopwatch();
                 sw.Start();
-                CompilerResult result = await node.ExecuteProcess(options);
+                CompilerResult result = await NodeProcess.ExecuteProcess(options);
                 sw.Stop();
 
                 Logger.Log($"> {result.Arguments}");
@@ -118,7 +118,7 @@ namespace LessCompiler
             VsHelpers.AddNestedFile(cssFilePath, minFilePath);
         }
 
-        public static async Tasks.Task Install(NodeProcess node)
+        public static async Tasks.Task Install()
         {
             var statusbar = (IVsStatusbar)ServiceProvider.GlobalProvider.GetService(typeof(SVsStatusbar));
 
@@ -126,7 +126,7 @@ namespace LessCompiler
             statusbar.SetText($"Installing {NodeProcess.Packages} npm modules...");
             statusbar.FreezeOutput(1);
 
-            bool success = await node.EnsurePackageInstalled();
+            bool success = await NodeProcess.EnsurePackageInstalled();
             string status = success ? "Done" : "Failed";
 
             statusbar.FreezeOutput(0);

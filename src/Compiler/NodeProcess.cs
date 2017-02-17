@@ -6,25 +6,25 @@ using System.Threading.Tasks;
 
 namespace LessCompiler
 {
-    internal class NodeProcess
+    internal static class NodeProcess
     {
-        public const string Packages = "less less-plugin-autoprefix less-plugin-csscomb";
+        public const string Packages = "less@2.7.2 less-plugin-autoprefix less-plugin-csscomb";
 
         private static string _installDir = Path.Combine(Path.GetTempPath(), Vsix.Name.Replace(" ", ""), Packages.GetHashCode().ToString());
         private static string _executable = Path.Combine(_installDir, "node_modules\\.bin\\lessc.cmd");
 
-        public bool IsInstalling
+        public static bool IsInstalling
         {
             get;
             private set;
         }
 
-        public bool IsReadyToExecute()
+        public static bool IsReadyToExecute()
         {
             return File.Exists(_executable);
         }
 
-        public async Task<bool> EnsurePackageInstalled()
+        public static async Task<bool> EnsurePackageInstalled()
         {
             if (IsInstalling)
                 return false;
@@ -32,20 +32,30 @@ namespace LessCompiler
             if (IsReadyToExecute())
                 return true;
 
-            bool success = await Task.Run(() =>
-             {
-                 IsInstalling = true;
+            IsInstalling = true;
 
+            bool success = await Task.Run(async () =>
+             {
                  try
                  {
+                     // Clean up any failed installation attempts
+                     if (Directory.Exists(_installDir))
+                         Directory.Delete(_installDir, true);
+
                      if (!Directory.Exists(_installDir))
                          Directory.CreateDirectory(_installDir);
 
-                     var start = new ProcessStartInfo("cmd", $"/c npm install {Packages} --no-optional")
+                     string args = $"npm install {Packages} --no-optional";
+                     Logger.Log(args);
+
+                     var start = new ProcessStartInfo("cmd", $"/c {args}")
                      {
                          WorkingDirectory = _installDir,
                          UseShellExecute = false,
                          RedirectStandardOutput = true,
+                         RedirectStandardError = true,
+                         StandardOutputEncoding = Encoding.UTF8,
+                         StandardErrorEncoding = Encoding.UTF8,
                          CreateNoWindow = true,
                      };
 
@@ -53,7 +63,17 @@ namespace LessCompiler
 
                      using (var proc = Process.Start(start))
                      {
+                         string output = await proc.StandardOutput.ReadToEndAsync();
+                         string error = await proc.StandardOutput.ReadToEndAsync();
+
                          proc.WaitForExit();
+
+                         if (!string.IsNullOrEmpty(output))
+                             Logger.Log(output);
+
+                         if (!string.IsNullOrEmpty(error))
+                             Logger.Log(error);
+
                          return proc.ExitCode == 0;
                      }
                  }
@@ -71,7 +91,7 @@ namespace LessCompiler
             return success;
         }
 
-        public async Task<CompilerResult> ExecuteProcess(CompilerOptions options)
+        public static async Task<CompilerResult> ExecuteProcess(CompilerOptions options)
         {
             if (!await EnsurePackageInstalled())
                 return null;

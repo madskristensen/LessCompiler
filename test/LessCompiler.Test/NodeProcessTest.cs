@@ -49,8 +49,7 @@ namespace LessCompilerTest
         {
             var less = new FileInfo("..\\..\\artifacts\\" + fileName);
             var options = new CompilerOptions(less.FullName);
-            var node = new NodeProcess();
-            return await node.ExecuteProcess(options);
+            return await NodeProcess.ExecuteProcess(options);
         }
     }
 }
