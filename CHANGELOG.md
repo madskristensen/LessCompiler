@@ -1,8 +1,7 @@
 # Road map
 
 - [x] Install npm modules when VS starts
-- [ ] Use IvsRunningDocumentTable for the save event
-- [ ] Alert when the npm modules are being installed when .less file is saved
+- [x] Alert when the npm modules are being installed when .less file is saved
 
 Features that have a checkmark are complete and available for
 download in the

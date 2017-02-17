@@ -1,6 +1,4 @@
 ﻿using EnvDTE;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using NUglify;
 using NUglify.Css;
 using System;
@@ -44,7 +42,7 @@ namespace LessCompiler
                 CompilerResult result = await NodeProcess.ExecuteProcess(options);
                 sw.Stop();
 
-                Logger.Log($"> {result.Arguments}");
+                Logger.Log($"{result.Arguments}");
 
                 if (result.HasError)
                 {
@@ -54,11 +52,7 @@ namespace LessCompiler
                 else
                 {
                     AddFilesToProject(options);
-
-                    if (options.Minify)
-                    {
-                        Minify(options.OutputFilePath);
-                    }
+                    Minify(options);
                 }
 
                 VsHelpers.WriteStatus($"LESS file compiled in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
@@ -94,12 +88,12 @@ namespace LessCompiler
             }
         }
 
-        public static void Minify(string cssFilePath)
+        public static void Minify(CompilerOptions options)
         {
-            if (!File.Exists(cssFilePath))
+            if (!options.Minify || !File.Exists(options.OutputFilePath))
                 return;
 
-            string cssContent = File.ReadAllText(cssFilePath);
+            string cssContent = File.ReadAllText(options.OutputFilePath);
 
             var settings = new CssSettings
             {
@@ -112,26 +106,10 @@ namespace LessCompiler
             if (result.HasErrors)
                 return;
 
-            string minFilePath = Path.ChangeExtension(cssFilePath, ".min.css");
+            string minFilePath = Path.ChangeExtension(options.OutputFilePath, ".min.css");
             VsHelpers.CheckFileOutOfSourceControl(minFilePath);
             File.WriteAllText(minFilePath, result.Code, new UTF8Encoding(true));
-            VsHelpers.AddNestedFile(cssFilePath, minFilePath);
-        }
-
-        public static async Tasks.Task Install()
-        {
-            var statusbar = (IVsStatusbar)ServiceProvider.GlobalProvider.GetService(typeof(SVsStatusbar));
-
-            statusbar.FreezeOutput(0);
-            statusbar.SetText($"Installing {NodeProcess.Packages} npm modules...");
-            statusbar.FreezeOutput(1);
-
-            bool success = await NodeProcess.EnsurePackageInstalled();
-            string status = success ? "Done" : "Failed";
-
-            statusbar.FreezeOutput(0);
-            statusbar.SetText($"Installing {NodeProcess.Packages} npm modules... {status}");
-            statusbar.FreezeOutput(1);
+            VsHelpers.AddNestedFile(options.OutputFilePath, minFilePath);
         }
     }
 }

@@ -6,7 +6,7 @@
         {
             OutputFile = outputFile;
             Error = error;
-            Arguments = "lessc.cmd " + arguments;
+            Arguments = "lessc " + arguments;
         }
 
         public string OutputFile { get; set; }

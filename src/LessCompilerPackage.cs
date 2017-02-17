@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Tasks = System.Threading.Tasks;
-using Microsoft.VisualStudio.Shell.Interop;
 
 namespace LessCompiler
 {
@@ -21,6 +21,5 @@ namespace LessCompiler
                 await NodeProcess.EnsurePackageInstalled();
             }
         }
-
     }
 }

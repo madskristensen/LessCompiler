@@ -20,7 +20,7 @@ namespace LessCompiler
         [Import]
         private ITextDocumentFactoryService DocumentService { get; set; }
 
-        public async void VsTextViewCreated(IVsTextView textViewAdapter)
+        public void VsTextViewCreated(IVsTextView textViewAdapter)
         {
             _view = AdaptersFactory.GetWpfTextView(textViewAdapter);
 
@@ -28,11 +28,6 @@ namespace LessCompiler
                 return;
 
             doc.FileActionOccurred += DocumentSaved;
-
-            if (!NodeProcess.IsReadyToExecute())
-            {
-                await CompilerService.Install();
-            }
         }
 
         private async void DocumentSaved(object sender, TextDocumentFileActionEventArgs e)
@@ -40,7 +35,11 @@ namespace LessCompiler
             if (e.FileActionType != FileActionTypes.ContentSavedToDisk)
                 return;
 
-            if (NodeProcess.IsReadyToExecute())
+            if (NodeProcess.IsInstalling)
+            {
+                VsHelpers.WriteStatus("The LESS compiler is being installed. Please try again in a few seconds...");
+            }
+            else if (NodeProcess.IsReadyToExecute())
             {
                 CompilerOptions options = CompilerService.GetOptions(e.FilePath, _view.TextBuffer.CurrentSnapshot.GetText());
                 await CompilerService.Compile(options);
