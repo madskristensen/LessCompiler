@@ -1,8 +1,7 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.Shell;
+using System;
 using System.ComponentModel.Design;
-using System.IO;
-using System.Windows;
-using Microsoft.VisualStudio.Shell;
+using EnvDTE;
 
 namespace LessCompiler
 {
@@ -14,7 +13,7 @@ namespace LessCompiler
         {
             _package = package ?? throw new ArgumentNullException(nameof(package));
 
-            var cmdId = new CommandID(PackageGuids.guidPackageCmdSet, PackageIds.Enabled);
+            var cmdId = new CommandID(PackageGuids.guidPackageCmdSet, PackageIds.cmdEnabled);
             var cmd = new OleMenuCommand(Execute, cmdId);
             cmd.BeforeQueryStatus += BeforeQueryStatus;
             commandService.AddCommand(cmd);
@@ -39,9 +38,11 @@ namespace LessCompiler
         private void BeforeQueryStatus(object sender, EventArgs e)
         {
             var button = (OleMenuCommand)sender;
-            string text = "Enable LESS Compiler";
 
-            if (LessCompilerPackage.Options.Enabled)
+            string text = "Enable LESS Compiler";
+            Project project = VsHelpers.DTE.SelectedItems.Item(1).Project;
+
+            if (Settings.IsEnabled(project))
                 text = "Disable LESS Compiler";
 
             button.Text = text;
@@ -49,8 +50,9 @@ namespace LessCompiler
 
         private void Execute(object sender, EventArgs e)
         {
-            LessCompilerPackage.Options.Enabled = !LessCompilerPackage.Options.Enabled;
-            LessCompilerPackage.Options.SaveSettingsToStorage();
+            Project project = VsHelpers.DTE.SelectedItems.Item(1).Project;
+            bool isEnabled = Settings.IsEnabled(project);
+            Settings.Enable(project, !isEnabled);
         }
     }
 }

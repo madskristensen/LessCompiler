@@ -12,7 +12,6 @@ namespace LessCompiler
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration("#110", "#112", Vsix.Version, IconResourceID = 400)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [ProvideOptionPage(typeof(Options), "Web", Vsix.Name, 101, 111, true, new string[0], ProvidesLocalizedCategoryName = false)]
     [ProvideAutoLoad(PackageGuids.guidAutoLoadString)]
     [ProvideUIContextRule(PackageGuids.guidAutoLoadString, Vsix.Id,
          "WAP | WebSite | DotNetCoreWeb | ProjectK | Cordova | Node| Less",
@@ -36,21 +35,11 @@ namespace LessCompiler
         })]
     public sealed class LessCompilerPackage : AsyncPackage
     {
-        public static Options Options
-        {
-            get;
-            private set;
-        }
-
         protected override async Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            Options = (Options)GetDialogPage(typeof(Options));
-
             if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commandService)
             {
                 EnableCommand.Initialize(this, commandService);
-                AlwaysOnCommand.Initialize(this, commandService);
-                PerProjectCommand.Initialize(this, commandService);
             }
         }
     }

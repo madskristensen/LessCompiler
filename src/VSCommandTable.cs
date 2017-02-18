@@ -24,11 +24,7 @@ namespace LessCompiler
     /// </summary>
     internal sealed partial class PackageIds
     {
-        public const int ToolbarMenu = 0x0001;
-        public const int ToolbarGroup = 0x0100;
-        public const int ToolbarMenuGroup = 0x0200;
-        public const int Enabled = 0x1000;
-        public const int AlwaysOn = 0x1100;
-        public const int OptIn = 0x1200;
+        public const int ContextMenuGroup = 0x0001;
+        public const int cmdEnabled = 0x1000;
     }
 }

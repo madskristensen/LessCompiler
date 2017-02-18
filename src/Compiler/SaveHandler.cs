@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
-using System.IO;
 
 namespace LessCompiler
 {
@@ -30,19 +29,20 @@ namespace LessCompiler
             if (!DocumentService.TryGetTextDocument(_view.TextBuffer, out ITextDocument doc))
                 return;
 
-            string fileName = Path.GetFileName(doc.FilePath);
             _projectItem = VsHelpers.DTE.Solution.FindProjectItem(doc.FilePath);
 
             if (_projectItem?.ContainingProject != null)
             {
-                await LessCatalog.EnsureCatalog(_projectItem.ContainingProject);
+                if (Settings.IsEnabled(_projectItem.ContainingProject))
+                    await LessCatalog.EnsureCatalog(_projectItem.ContainingProject);
+
                 doc.FileActionOccurred += DocumentSaved;
             }
         }
 
         private async void DocumentSaved(object sender, TextDocumentFileActionEventArgs e)
         {
-            if (e.FileActionType != FileActionTypes.ContentSavedToDisk)
+            if (e.FileActionType != FileActionTypes.ContentSavedToDisk || !Settings.IsEnabled(_projectItem.ContainingProject))
                 return;
 
             if (NodeProcess.IsInstalling)
@@ -52,6 +52,7 @@ namespace LessCompiler
             else if (NodeProcess.IsReadyToExecute())
             {
                 var options = CompilerOptions.Parse(e.FilePath, _view.TextBuffer.CurrentSnapshot.GetText());
+                await LessCatalog.EnsureCatalog(_projectItem.ContainingProject);
 
                 if (options.Compile)
                 {

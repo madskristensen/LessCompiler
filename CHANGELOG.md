@@ -3,8 +3,9 @@
 - [x] Install npm modules when VS starts
 - [x] Alert when the npm modules are installed when .less file is saved
 - [x] Compile parent .less files when child file changes
+- [x] Context menu command to enable compiler for project
 - [ ] Compile only parent files and not all files
-- [ ] Button to disable compilation
+- [ ] Adornment to toggle compilation per solution
 
 Features that have a checkmark are complete and available for
 download in the
