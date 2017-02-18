@@ -4,8 +4,8 @@
 - [x] Alert when the npm modules are installed when .less file is saved
 - [x] Compile parent .less files when child file changes
 - [x] Context menu command to enable compiler for project
+- [x] Adornment to toggle compilation per solution
 - [ ] Compile only parent files and not all files
-- [ ] Adornment to toggle compilation per solution
 
 Features that have a checkmark are complete and available for
 download in the

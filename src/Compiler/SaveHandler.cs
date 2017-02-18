@@ -30,14 +30,17 @@ namespace LessCompiler
                 return;
 
             _projectItem = VsHelpers.DTE.Solution.FindProjectItem(doc.FilePath);
+            Project project = _projectItem?.ContainingProject;
 
-            if (_projectItem?.ContainingProject != null)
-            {
-                if (Settings.IsEnabled(_projectItem.ContainingProject))
-                    await LessCatalog.EnsureCatalog(_projectItem.ContainingProject);
+            if (project == null)
+                return;
 
-                doc.FileActionOccurred += DocumentSaved;
-            }
+            _view.Properties.AddProperty("adornment", new GeneratedAdornment(_view, project));
+
+            if (Settings.IsEnabled(project))
+                await LessCatalog.EnsureCatalog(project);
+
+            doc.FileActionOccurred += DocumentSaved;
         }
 
         private async void DocumentSaved(object sender, TextDocumentFileActionEventArgs e)
