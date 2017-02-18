@@ -9,7 +9,7 @@ using Tasks = System.Threading.Tasks;
 
 namespace LessCompiler
 {
-    internal class CompilerService
+    internal static class CompilerService
     {
         public static async Tasks.Task CompileProjectAsync(Project project)
         {
@@ -59,6 +59,14 @@ namespace LessCompiler
                 Logger.Log(ex);
                 VsHelpers.WriteStatus($"Error compiling LESS file. See Output Window for details");
             }
+        }
+
+        public static bool SupportsCompilation(this Project project)
+        {
+            if (project?.Properties == null)
+                return false;
+
+            return true;
         }
 
         private static void AddFilesToProject(CompilerOptions options)

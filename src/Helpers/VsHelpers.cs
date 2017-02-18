@@ -137,6 +137,17 @@ namespace LessCompiler
 
             return null;
         }
+
+        internal static Project GetActiveProject()
+        {
+            if (DTE.Solution != null && DTE.ActiveSolutionProjects is Array projects)
+            {
+                if (projects.GetValue(0) is Project project)
+                    return project;
+            }
+
+            return null;
+        }
     }
 
     public static class ProjectTypes

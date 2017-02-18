@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <Extern href="stdidcmd.h"/>
+    <Extern href="vsshlids.h"/>
+    <Include href="KnownImageIds.vsct"/>
+
+    <Commands package="guidPackage">
+        <Buttons>
+            <Button guid="guidPackageCmdSet" id="ReCompileAll" priority="0x0500" type="Button">
+                <Icon guid="ImageCatalogGuid" id="LESSStyleSheet" />
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <Strings>
+                    <ButtonText>Re-Compile All LESS Files</ButtonText>
+                    <LocCanonicalName>ReCompileAllLessFiles</LocCanonicalName>
+                </Strings>
+            </Button>
+        </Buttons>
+    </Commands>
+
+    <CommandPlacements>
+        <CommandPlacement guid="guidPackageCmdSet" id="ReCompileAll" priority="0x0200">
+            <Parent guid="guidSHLMainMenu" id="IDM_VS_CSCD_PROJECT_WEB"/>
+        </CommandPlacement>
+        <CommandPlacement guid="guidPackageCmdSet" id="ReCompileAll" priority="0x0200">
+            <Parent guid="guidSHLMainMenu" id="IDG_VS_PROJ_OPTIONS"/>
+        </CommandPlacement>
+    </CommandPlacements>
+
+    <KeyBindings>
+        <KeyBinding guid="guidPackageCmdSet" id="ReCompileAll" mod1="Shift Alt" key1="Y" editor="guidVSStd97"/>
+        <KeyBinding guid="guidPackageCmdSet" id="ReCompileAll" mod1="Shift Alt" key1="Y" editor="guidVSStd97"/>
+    </KeyBindings>
+
+    <Symbols>
+        <!-- This is the package guid. -->
+        <GuidSymbol name="guidPackage" value="{5ac1b994-61c2-4d5c-ab54-3c64f095a843}" />
+        <GuidSymbol name="guidInstallerPackage" value="{a4aab915-6143-4ac5-b899-1bd64f6fd4c3}" />
+
+        <!-- This is the guid used to group the menu commands together -->
+        <GuidSymbol name="guidPackageCmdSet" value="{e26be7ce-2c0c-4810-b1fe-27f364e2811a}">
+            <IDSymbol name="ReCompileAll" value="0x1000" />
+        </GuidSymbol>
+    </Symbols>
+</CommandTable>
+

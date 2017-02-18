@@ -32,7 +32,8 @@ namespace LessCompiler
             _projectItem = VsHelpers.DTE.Solution.FindProjectItem(doc.FilePath);
             Project project = _projectItem?.ContainingProject;
 
-            if (project == null)
+            // Test for Properties to exclude misc files
+            if (!project.SupportsCompilation())
                 return;
 
             _view.Properties.AddProperty("adornment", new Adornment(_view, project));
