@@ -7,28 +7,26 @@
 
     <Commands package="guidPackage">
         <Buttons>
-            <Button guid="guidPackageCmdSet" id="ReCompileAll" priority="0x0500" type="Button">
+            <Button guid="guidPackageCmdSet" id="ReCompileAll" priority="0x0300" type="Button">
+                <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_BUILD"/>
                 <Icon guid="ImageCatalogGuid" id="LESSStyleSheet" />
                 <CommandFlag>IconIsMoniker</CommandFlag>
+                <CommandFlag>DefaultInvisible</CommandFlag>
+                <CommandFlag>DynamicVisibility</CommandFlag>
                 <Strings>
-                    <ButtonText>Re-Compile All LESS Files</ButtonText>
-                    <LocCanonicalName>ReCompileAllLessFiles</LocCanonicalName>
+                    <ButtonText>Compile LESS Files</ButtonText>
+                    <LocCanonicalName>CompileLessFiles</LocCanonicalName>
                 </Strings>
             </Button>
         </Buttons>
     </Commands>
 
-    <CommandPlacements>
-        <CommandPlacement guid="guidPackageCmdSet" id="ReCompileAll" priority="0x0200">
-            <Parent guid="guidSHLMainMenu" id="IDM_VS_CSCD_PROJECT_WEB"/>
-        </CommandPlacement>
-        <CommandPlacement guid="guidPackageCmdSet" id="ReCompileAll" priority="0x0200">
-            <Parent guid="guidSHLMainMenu" id="IDG_VS_PROJ_OPTIONS"/>
-        </CommandPlacement>
-    </CommandPlacements>
+    <VisibilityConstraints>
+        <VisibilityItem guid="guidPackageCmdSet" id="ReCompileAll" context="UICONTEXT_SolutionHasMultipleProjects" />
+        <VisibilityItem guid="guidPackageCmdSet" id="ReCompileAll" context="UICONTEXT_SolutionHasSingleProject" />
+     </VisibilityConstraints>
 
     <KeyBindings>
-        <KeyBinding guid="guidPackageCmdSet" id="ReCompileAll" mod1="Shift Alt" key1="Y" editor="guidVSStd97"/>
         <KeyBinding guid="guidPackageCmdSet" id="ReCompileAll" mod1="Shift Alt" key1="Y" editor="guidVSStd97"/>
     </KeyBindings>
 

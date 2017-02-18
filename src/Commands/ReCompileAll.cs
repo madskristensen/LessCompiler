@@ -3,6 +3,9 @@ using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Design;
 using Tasks = System.Threading.Tasks;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio;
+using System.Collections.Generic;
 
 namespace LessCompiler
 {
@@ -36,13 +39,47 @@ namespace LessCompiler
 
         private async Tasks.Task Execute()
         {
-            Project project = VsHelpers.GetActiveProject();
+            if (!NodeProcess.IsReadyToExecute())
+                return;
 
-            if (project != null && NodeProcess.IsReadyToExecute())
+            var solution = (IVsSolution)ServiceProvider.GetService(typeof(SVsSolution));
+            IEnumerable<IVsHierarchy> hierarchies = GetProjectsInSolution(solution, __VSENUMPROJFLAGS.EPF_LOADEDINSOLUTION);
+
+            foreach (IVsHierarchy hierarchy in hierarchies)
             {
-                await LessCatalog.EnsureCatalog(project);
-                await CompilerService.CompileProjectAsync(project);
+                Project project = GetDTEProject(hierarchy);
+
+                if (project.SupportsCompilation() && Settings.IsEnabled(project))
+                {
+                    await LessCatalog.EnsureCatalog(project);
+                    await CompilerService.CompileProjectAsync(project);
+                }
             }
+        }
+
+        // From http://stackoverflow.com/questions/22705089/how-to-get-list-of-projects-in-current-visual-studio-solution
+        public static IEnumerable<IVsHierarchy> GetProjectsInSolution(IVsSolution solution, __VSENUMPROJFLAGS flags)
+        {
+            if (solution == null)
+                yield break;
+
+            Guid guid = Guid.Empty;
+            solution.GetProjectEnum((uint)flags, ref guid, out IEnumHierarchies enumHierarchies);
+            if (enumHierarchies == null)
+                yield break;
+
+            IVsHierarchy[] hierarchy = new IVsHierarchy[1];
+            while (enumHierarchies.Next(1, hierarchy, out uint fetched) == VSConstants.S_OK && fetched == 1)
+            {
+                if (hierarchy.Length > 0 && hierarchy[0] != null)
+                    yield return hierarchy[0];
+            }
+        }
+
+        public static Project GetDTEProject(IVsHierarchy hierarchy)
+        {
+            hierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ExtObject, out object obj);
+            return obj as Project;
         }
     }
 }
