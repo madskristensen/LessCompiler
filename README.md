@@ -106,6 +106,23 @@ By default a `.min.css` file is generated, but that can be turned off by a comme
 
 This example doesn't minify the output, enables both relative urls and source maps and redirects the output file to a different directory.
 
+### Compiler default options
+You can specify the compiler options for the solution, the project or for individual folders by placing a file called `less.defaults` in any folder next to or above the .less files.
+
+The default file cannot contain information about the output file, but all other options can be set.
+
+**Example:**
+
+```
+--source-map --relative-urls --strict-math
+```
+
+Even though minification isn't technically an option you set on the compiler, you can still opt out of minification like so:
+
+```
+no-minify --source-map --relative-urls --strict-math
+```
+
 ## Contribute
 Check out the [contribution guidelines](.github/CONTRIBUTING.md)
 if you want to contribute to this project.

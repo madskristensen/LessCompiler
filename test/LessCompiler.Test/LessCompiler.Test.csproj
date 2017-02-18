@@ -53,6 +53,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="artifacts\defaults\customdefaults.less" />
+    <None Include="artifacts\defaults\less.defaults" />
     <None Include="artifacts\sourcemap.less" />
     <None Include="artifacts\undefined-variable.less" />
     <None Include="artifacts\autoprefix.less" />

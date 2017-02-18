@@ -1,7 +1,6 @@
 ﻿using LessCompiler;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace LessCompilerTest
 {
@@ -83,6 +82,18 @@ namespace LessCompilerTest
             Assert.AreEqual(options.OutputFilePath, Path.ChangeExtension(_lessFilePath, ".css"));
             Assert.IsTrue(options.Compile);
             Assert.IsTrue(options.Minify);
+        }
+
+        [TestMethod]
+        public void CustomDefaults()
+        {
+            string lessFile = new FileInfo("..\\..\\artifacts\\defaults\\customdefaults.less").FullName;
+            var options = CompilerOptions.Parse(lessFile);
+
+            Assert.AreEqual("\"customdefaults.less\" --source-map \"customdefaults.css\"", options.Arguments);
+            Assert.AreEqual(options.OutputFilePath, Path.ChangeExtension(lessFile, ".css"));
+            Assert.IsTrue(options.Compile);
+            Assert.IsFalse(options.Minify);
         }
     }
 }

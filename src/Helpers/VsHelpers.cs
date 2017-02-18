@@ -1,9 +1,9 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.IO;
-using Microsoft.VisualStudio.Shell.Interop;
 
 namespace LessCompiler
 {
@@ -134,17 +134,6 @@ namespace LessCompiler
 
             if (File.Exists(fullPath))
                 return Path.GetDirectoryName(fullPath);
-
-            return null;
-        }
-
-        internal static Project GetActiveProject()
-        {
-            if (DTE.Solution != null && DTE.ActiveSolutionProjects is Array projects)
-            {
-                if (projects.GetValue(0) is Project project)
-                    return project;
-            }
 
             return null;
         }

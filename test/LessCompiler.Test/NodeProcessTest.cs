@@ -13,7 +13,7 @@ namespace LessCompilerTest
         {
             var dir = new DirectoryInfo("..\\..\\artifacts\\");
 
-            foreach (FileInfo cssFile in dir.GetFiles("*.css*"))
+            foreach (FileInfo cssFile in dir.GetFiles("*.css*", SearchOption.AllDirectories))
             {
                 cssFile.Delete();
             }
@@ -42,8 +42,10 @@ namespace LessCompilerTest
         {
             CompilerResult result = await Execute("sourcemap.less");
 
+            string mapFile = Path.ChangeExtension(result.OutputFile, ".css.map");
             Assert.IsFalse(result.HasError);
             Assert.IsTrue(File.Exists(result.OutputFile));
+            Assert.IsTrue(File.Exists(mapFile));
         }
 
         private static async Task<CompilerResult> Execute(string fileName)

@@ -16,15 +16,17 @@ namespace LessCompiler
 
             string inFile = Path.GetFileName(InputFilePath);
             string outFile = Path.GetFileName(OutputFilePath);
+            string defaults = GetCompilerDefaults(lessFilePath, out bool minify);
 
-            Arguments = $"\"{inFile}\" --relative-urls --autoprefix=\">0%\" --csscomb=zen \"{outFile}\"";
+            Minify = minify;
+            Arguments = $"\"{inFile}\" {defaults} \"{outFile}\"";
         }
 
         public string InputFilePath { get; set; }
         public string OutputFilePath { get; set; }
         public string Arguments { get; set; }
-        public bool Minify { get; set; }
-        public bool Compile { get; set; }
+        public bool Minify { get; set; } = true;
+        public bool Compile { get; set; } = true;
 
         public static CompilerOptions Parse(string lessFilePath, string lessContent = null)
         {
@@ -33,12 +35,12 @@ namespace LessCompiler
 
             // Compile
             if (!Path.GetFileName(lessFilePath).StartsWith("_", StringComparison.Ordinal))
-                if (lessContent.IndexOf("no-compile", StringComparison.OrdinalIgnoreCase) == -1)
-                    options.Compile = true;
+                if (lessContent.IndexOf("no-compile", StringComparison.OrdinalIgnoreCase) > -1)
+                    options.Compile = false;
 
             // Minify
-            if (lessContent.IndexOf("no-minify", StringComparison.OrdinalIgnoreCase) == -1)
-                options.Minify = true;
+            if (lessContent.IndexOf("no-minify", StringComparison.OrdinalIgnoreCase) > -1)
+                options.Minify = false;
 
             // Arguments
             Match argsMatch = _regex.Match(lessContent, 0, Math.Min(500, lessContent.Length));
@@ -69,6 +71,31 @@ namespace LessCompiler
             options.Arguments = options.Arguments.Trim();
 
             return options;
+        }
+
+        private static string GetCompilerDefaults(string lessFilePath, out bool minify)
+        {
+            minify = true;
+            DirectoryInfo parent = new FileInfo(lessFilePath).Directory;
+
+            while (parent != null)
+            {
+                string defaultFile = Path.Combine(parent.FullName, "less.defaults");
+
+                if (File.Exists(defaultFile))
+                {
+                    string content = File.ReadAllText(defaultFile);
+
+                    if (content.IndexOf("no-minify") > -1)
+                        minify = false;
+
+                    return content.Replace("no-minify", "").Trim();
+                }
+
+                parent = parent.Parent;
+            }
+
+            return "--relative-urls --autoprefix=\">0%\" --csscomb=zen";
         }
     }
 }
