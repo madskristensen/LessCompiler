@@ -69,9 +69,14 @@ namespace LessCompiler
         private static async Task BuildCatalog(Project project)
         {
             IsBuilding = true;
+            string root = project.GetRootFolder();
+
+            if (string.IsNullOrEmpty(root) || !Directory.Exists(root))
+                return;
+
             await Task.Run(() =>
             {
-                IEnumerable<string> lessFiles = FindLessFiles(project.GetRootFolder());
+                IEnumerable<string> lessFiles = FindLessFiles(root);
 
                 foreach (string file in lessFiles)
                 {

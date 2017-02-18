@@ -7,34 +7,72 @@
 
   <Commands package="guidPackage">
     <Groups>
-      <!--<Group guid="guidPackageCmdSet" id="MyMenuGroup" priority="0x0300">
-        <Parent guid="CssCmdSet" id="cssContextMenu"/>
-      </Group>-->
+      <Group guid="guidPackageCmdSet" id="ToolbarGroup" priority="0x1000">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_TOOL_STANDARD"/>
+      </Group>
+      <Group guid="guidPackageCmdSet" id="ToolbarMenuGroup" priority="0x0300">
+        <Parent guid="guidPackageCmdSet" id="ToolbarMenu"/>
+      </Group>
     </Groups>
 
+    <Menus>
+      <Menu guid="guidPackageCmdSet" id="ToolbarMenu" priority="0x0200" type="MenuController">
+        <Parent guid="guidPackageCmdSet" id="ToolbarGroup"/>
+        <CommandFlag>NotInTBList</CommandFlag>
+        <Strings>
+          <ButtonText>My menu</ButtonText>
+        </Strings>
+      </Menu>
+    </Menus>
+
     <Buttons>
-      <!--<Button guid="guidPackageCmdSet" id="AutoPrefixCommandId" priority="0x0100" type="Button">
-        <Parent guid="guidPackageCmdSet" id="MyMenuGroup" />
+      <Button guid="guidPackageCmdSet" id="Enabled" priority="0x0100" type="Button">
+        <Parent guid="guidPackageCmdSet" id="ToolbarMenuGroup" />
         <Icon guid="ImageCatalogGuid" id="LESSStyleSheet"/>
         <CommandFlag>IconIsMoniker</CommandFlag>
-        <CommandFlag>DefaultDisabled</CommandFlag>
-        <CommandFlag>DefaultInvisible</CommandFlag>
-        <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
         <Strings>
-          <ButtonText>Autoprefix</ButtonText>
-          <CanonicalName>AutoPrefix</CanonicalName>
+          <ButtonText>Enabled</ButtonText>
+          <CanonicalName>Enabled</CanonicalName>
         </Strings>
-      </Button>-->
+      </Button>
+      <Button guid="guidPackageCmdSet" id="AlwaysOn" priority="0x0200" type="Button">
+        <Parent guid="guidPackageCmdSet" id="ToolbarMenuGroup" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <ButtonText>AlwaysOn</ButtonText>
+          <CanonicalName>AlwaysOn</CanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="guidPackageCmdSet" id="OptIn" priority="0x0200" type="Button">
+        <Parent guid="guidPackageCmdSet" id="ToolbarMenuGroup" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <ButtonText>OptIn</ButtonText>
+          <CanonicalName>OptIn</CanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
   </Commands>
 
+  <VisibilityConstraints>
+    <VisibilityItem guid="guidPackageCmdSet" id="Enabled" context="guidAutoLoad" />
+    <VisibilityItem guid="guidPackageCmdSet" id="AlwaysOn" context="guidAutoLoad" />
+    <VisibilityItem guid="guidPackageCmdSet" id="OptIn" context="guidAutoLoad" />
+  </VisibilityConstraints>
+
   <Symbols>
     <GuidSymbol name="guidPackage" value="{5ac1b994-61c2-4d5c-ab54-3c64f095a843}" />
+    <GuidSymbol name="guidAutoLoad" value="{214a804c-9787-4ce6-bc4b-d4691dd46d2b}" />
 
     <GuidSymbol name="guidPackageCmdSet" value="{e9baa158-19eb-488b-93a6-9f305e55a422}">
-      <IDSymbol name="MyMenuGroup" value="0x1020" />
-      <IDSymbol name="AutoPrefixCommandId" value="0x0100" />
+      <IDSymbol name="ToolbarMenu" value="0x0001" />
+      <IDSymbol name="ToolbarGroup" value="0x0100" />
+      <IDSymbol name="ToolbarMenuGroup" value="0x0200" />
+      <IDSymbol name="Enabled" value="0x1000" />
+      <IDSymbol name="AlwaysOn" value="0x1100" />
+      <IDSymbol name="OptIn" value="0x1200" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

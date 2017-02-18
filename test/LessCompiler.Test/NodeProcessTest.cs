@@ -13,7 +13,7 @@ namespace LessCompilerTest
         {
             var dir = new DirectoryInfo("..\\..\\artifacts\\");
 
-            foreach (FileInfo cssFile in dir.GetFiles("*.css"))
+            foreach (FileInfo cssFile in dir.GetFiles("*.css*"))
             {
                 cssFile.Delete();
             }

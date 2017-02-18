@@ -13,8 +13,10 @@ namespace LessCompiler
     internal sealed partial class PackageGuids
     {
         public const string guidPackageString = "5ac1b994-61c2-4d5c-ab54-3c64f095a843";
+        public const string guidAutoLoadString = "214a804c-9787-4ce6-bc4b-d4691dd46d2b";
         public const string guidPackageCmdSetString = "e9baa158-19eb-488b-93a6-9f305e55a422";
         public static Guid guidPackage = new Guid(guidPackageString);
+        public static Guid guidAutoLoad = new Guid(guidAutoLoadString);
         public static Guid guidPackageCmdSet = new Guid(guidPackageCmdSetString);
     }
     /// <summary>
@@ -22,7 +24,11 @@ namespace LessCompiler
     /// </summary>
     internal sealed partial class PackageIds
     {
-        public const int MyMenuGroup = 0x1020;
-        public const int AutoPrefixCommandId = 0x0100;
+        public const int ToolbarMenu = 0x0001;
+        public const int ToolbarGroup = 0x0100;
+        public const int ToolbarMenuGroup = 0x0200;
+        public const int Enabled = 0x1000;
+        public const int AlwaysOn = 0x1100;
+        public const int OptIn = 0x1200;
     }
 }
