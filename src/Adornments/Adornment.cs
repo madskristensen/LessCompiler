@@ -10,11 +10,11 @@ using System.Windows.Threading;
 
 namespace LessCompiler
 {
-    class GeneratedAdornment : TextBlock
+    class Adornment : TextBlock
     {
         private Project _project;
 
-        public GeneratedAdornment(IWpfTextView view, Project project)
+        public Adornment(IWpfTextView view, Project project)
         {
             _project = project;
             Visibility = Visibility.Hidden;
@@ -41,15 +41,6 @@ namespace LessCompiler
             });
         }
 
-        private void ViewClosed(object sender, EventArgs e)
-        {
-            var view = (IWpfTextView)sender;
-            view.Closed -= ViewClosed;
-            view.ViewportHeightChanged -= SetAdornmentLocation;
-            view.ViewportWidthChanged -= SetAdornmentLocation;
-            Settings.Changed -= SettingsChanged;
-        }
-
         private void Initialize()
         {
             bool enabled = Settings.IsEnabled(_project);
@@ -64,6 +55,25 @@ namespace LessCompiler
             SetValue(TextOptions.TextRenderingModeProperty, TextRenderingMode.Aliased);
             SetValue(TextOptions.TextFormattingModeProperty, TextFormattingMode.Ideal);
             MouseLeftButtonUp += OnClick;
+        }
+
+        private void SetText(bool enabled)
+        {
+            string onOff = enabled ? "On" : "Off";
+            Text = $"Compile: {onOff}";
+
+            if (enabled)
+                ToolTip = $"The LESS Compiler is enabled for project \"{_project.Name}\".\r\nClick to disable it.";
+            else
+                ToolTip = $"The LESS Compiler is disabled for project \"{_project.Name}\".\r\nClick to enable it.";
+        }
+
+        private void SetAdornmentLocation(object sender, EventArgs e)
+        {
+            var view = (IWpfTextView)sender;
+            Canvas.SetLeft(this, view.ViewportRight - ActualWidth - 20);
+            Canvas.SetTop(this, view.ViewportBottom - ActualHeight - 20);
+            Visibility = Visibility.Visible;
         }
 
         private void OnClick(object sender, MouseButtonEventArgs e)
@@ -82,23 +92,13 @@ namespace LessCompiler
                 SetText(e.Enabled);
         }
 
-        private void SetText(bool enabled)
-        {
-            string onOff = enabled ? "On" : "Off";
-            Text = $"Less Compiler: {onOff}";
-
-            if (enabled)
-                ToolTip = $"The LESS Compiler is enabled for project \"{_project.Name}\".\r\nClick to disable it.";
-            else
-                ToolTip = $"The LESS Compiler is disabled for project \"{_project.Name}\".\r\nClick to enable it.";
-        }
-
-        private void SetAdornmentLocation(object sender, EventArgs e)
+        private void ViewClosed(object sender, EventArgs e)
         {
             var view = (IWpfTextView)sender;
-            Canvas.SetLeft(this, view.ViewportRight - ActualWidth - 20);
-            Canvas.SetTop(this, view.ViewportBottom - ActualHeight - 20);
-            Visibility = Visibility.Visible;
+            view.Closed -= ViewClosed;
+            view.ViewportHeightChanged -= SetAdornmentLocation;
+            view.ViewportWidthChanged -= SetAdornmentLocation;
+            Settings.Changed -= SettingsChanged;
         }
     }
 }

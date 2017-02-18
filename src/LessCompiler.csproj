@@ -49,7 +49,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Adornments\AdornmentLayer.cs" />
-    <Compile Include="Adornments\GeneratedAdornment.cs" />
+    <Compile Include="Adornments\Adornment.cs" />
     <Compile Include="Compiler\LessCatalog.cs" />
     <Compile Include="Compiler\SaveHandler.cs" />
     <Compile Include="Compiler\CompilerOptions.cs" />

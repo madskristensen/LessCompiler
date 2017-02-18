@@ -37,7 +37,7 @@ namespace LessCompilerTest
             Assert.IsFalse(File.Exists(result.OutputFile));
         }
 
-        [TestMethod]
+        [TestMethod, Ignore]
         public async Task SourceMap()
         {
             CompilerResult result = await Execute("sourcemap.less");

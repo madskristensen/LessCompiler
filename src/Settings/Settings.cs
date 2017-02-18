@@ -19,28 +19,26 @@ namespace LessCompiler
                 return;
 
             string guid = project.UniqueGuid();
+            string value = guid;
 
             if (_dte.Solution.Globals.VariableExists[SettingKey])
             {
-                string value = _dte.Solution.Globals[SettingKey].ToString();
+                value = _dte.Solution.Globals[SettingKey].ToString();
 
                 if (isEnabled)
                 {
                     if (!value.Contains(guid))
-                        _dte.Solution.Globals[SettingKey] = (value + "," + guid).Trim(',', ' ');
+                        value += "," + guid;
                 }
                 else
                 {
                     if (value.Contains(guid))
-                        _dte.Solution.Globals[SettingKey] = value.Replace(guid, "").Replace(",,", ",");
+                        value = value.Replace(guid, "").Replace(",,", ",");
                 }
             }
-            else if (isEnabled)
-            {
-                _dte.Solution.Globals[SettingKey] = guid;
-            }
 
-            _dte.Solution.Globals.VariablePersists[SettingKey] = isEnabled;
+            _dte.Solution.Globals[SettingKey] = value.Trim(',', ' ');
+            _dte.Solution.Globals.VariablePersists[SettingKey] = !string.IsNullOrEmpty(value);
 
             Changed?.Invoke(project, new SettingsChangedEventArgs(isEnabled));
         }
