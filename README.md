@@ -21,17 +21,35 @@ See the [change log](CHANGELOG.md) for changes and road map.
 - Minification support
 
 ### Compile on save
-All .less files will automatically be compiled into a .css file nested under it in Solution Explorer.
+All .less files will automatically be compiled into a .css file nested under it in Solution Explorer after being enabled on the project.
+
+By default, compilation is off and that's indicated by a watermark at the bottom right corner of any LESS file.
+
+![Watermark Off](art/watermark-off.png)
+
+To enable LESS compilation, simply click the watermark and it changes to indicate LESS compilation is "on".
+
+![Watermark On](art/watermark-on.png)
+
+Saving the LESS file will then compile into CSS.
 
 ![Solution Explorer](art/solution-explorer.png)
 
 The automatic compilation doesn't happen if:
 
-1. The .less file starts with an `_` like `_variables.less`
-2. The .less file isn't part of any project
-3. A comment in the .less file with the word `no-compile` is found
+1. The project hasn't been enabled for LESS compilation
+2. The .less file starts with an `_` like `_variables.less`
+3. The .less file isn't part of any project
+4. A comment in the .less file with the word `no-compile` is found
 
 The Output Window shows details about what is being executed to make it easy to troubleshoot any issues.
+
+**Note** that the the solution (.sln) file is updated to reflect that LESS compilation is enabled. Remember to save the solution when prompted to persits the information.
+
+### Compile all .less files
+The solution node in Solution Explorer has a command to compile all `.less` files in the projects enabled.
+
+![Compile all .less files](art/context-menu-solution.png)
 
 ### Compiler options
 You can set any compiler options as defined on the [LESS compiler website](http://lesscss.org/usage/#command-line-usage) inside a comment in the `.less` file. The comment is prefixed with `lessc` followed by the compiler options.
