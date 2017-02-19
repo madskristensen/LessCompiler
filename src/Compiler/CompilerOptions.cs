@@ -34,9 +34,9 @@ namespace LessCompiler
             var options = new CompilerOptions(lessFilePath);
 
             // Compile
-            if (!Path.GetFileName(lessFilePath).StartsWith("_", StringComparison.Ordinal))
-                if (lessContent.IndexOf("no-compile", StringComparison.OrdinalIgnoreCase) > -1)
-                    options.Compile = false;
+            if (Path.GetFileName(lessFilePath).StartsWith("_", StringComparison.Ordinal)
+                || lessContent.IndexOf("no-compile", StringComparison.OrdinalIgnoreCase) > -1)
+                options.Compile = false;
 
             // Minify
             if (lessContent.IndexOf("no-minify", StringComparison.OrdinalIgnoreCase) > -1)
@@ -97,5 +97,43 @@ namespace LessCompiler
 
             return "--relative-urls --autoprefix=\">0%\" --csscomb=zen";
         }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is CompilerOptions other))
+                return false;
+
+            return Equals(other);
+        }
+
+        public bool Equals(CompilerOptions other)
+        {
+            if (other == null)
+                return false;
+
+            return InputFilePath.Equals(other.InputFilePath, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override int GetHashCode()
+        {
+            return InputFilePath.GetHashCode();
+        }
+
+        public static bool operator ==(CompilerOptions a, CompilerOptions b)
+        {
+            if (ReferenceEquals(a, b))
+                return true;
+
+            if (((object)a == null) || ((object)b == null))
+                return false;
+
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(CompilerOptions a, CompilerOptions b)
+        {
+            return !(a == b);
+        }
+
     }
 }

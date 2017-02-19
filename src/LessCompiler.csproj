@@ -51,6 +51,7 @@
     <Compile Include="Adornments\AdornmentLayer.cs" />
     <Compile Include="Adornments\Adornment.cs" />
     <Compile Include="Compiler\LessCatalog.cs" />
+    <Compile Include="Compiler\ProjectMap.cs" />
     <Compile Include="Compiler\SaveHandler.cs" />
     <Compile Include="Compiler\CompilerOptions.cs" />
     <Compile Include="Compiler\CompilerResult.cs" />
@@ -77,8 +78,8 @@
       <Link>Resources\LICENSE</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-      <VSCTCompile Include="VSCommandTable.vsct">
-        <ResourceName>Menus.ctmenu</ResourceName>
+    <VSCTCompile Include="VSCommandTable.vsct">
+      <ResourceName>Menus.ctmenu</ResourceName>
       <Generator>VsctGenerator</Generator>
       <LastGenOutput>VSCommandTable.cs</LastGenOutput>
     </VSCTCompile>

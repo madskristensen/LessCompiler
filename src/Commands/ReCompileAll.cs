@@ -51,8 +51,8 @@ namespace LessCompiler
 
                 if (project.SupportsCompilation() && Settings.IsEnabled(project))
                 {
-                    await LessCatalog.EnsureCatalog(project);
-                    await CompilerService.CompileProjectAsync(project);
+                    if (await LessCatalog.EnsureCatalog(project))
+                        await CompilerService.CompileProjectAsync(project);
                 }
             }
         }

@@ -14,7 +14,7 @@ namespace LessCompiler
     internal sealed class CommandRegistration : IVsTextViewCreationListener
     {
         private IWpfTextView _view;
-        private ProjectItem _projectItem;
+        private Project _project;
 
         [Import]
         private IVsEditorAdaptersFactoryService AdaptersFactory { get; set; }
@@ -29,24 +29,23 @@ namespace LessCompiler
             if (!DocumentService.TryGetTextDocument(_view.TextBuffer, out ITextDocument doc))
                 return;
 
-            _projectItem = VsHelpers.DTE.Solution.FindProjectItem(doc.FilePath);
-            Project project = _projectItem?.ContainingProject;
+            _project = VsHelpers.DTE.Solution.FindProjectItem(doc.FilePath)?.ContainingProject;
 
             // Test for Properties to exclude misc files
-            if (!project.SupportsCompilation())
+            if (!_project.SupportsCompilation())
                 return;
 
-            _view.Properties.AddProperty("adornment", new Adornment(_view, project));
+            _view.Properties.AddProperty("adornment", new Adornment(_view, _project));
 
-            if (Settings.IsEnabled(project))
-                await LessCatalog.EnsureCatalog(project);
+            if (Settings.IsEnabled(_project))
+                await LessCatalog.EnsureCatalog(_project);
 
             doc.FileActionOccurred += DocumentSaved;
         }
 
         private async void DocumentSaved(object sender, TextDocumentFileActionEventArgs e)
         {
-            if (e.FileActionType != FileActionTypes.ContentSavedToDisk || !Settings.IsEnabled(_projectItem.ContainingProject))
+            if (e.FileActionType != FileActionTypes.ContentSavedToDisk || !Settings.IsEnabled(_project))
                 return;
 
             if (NodeProcess.IsInstalling)
@@ -56,17 +55,11 @@ namespace LessCompiler
             else if (NodeProcess.IsReadyToExecute())
             {
                 var options = CompilerOptions.Parse(e.FilePath, _view.TextBuffer.CurrentSnapshot.GetText());
-                await LessCatalog.EnsureCatalog(_projectItem.ContainingProject);
 
-                if (options.Compile)
-                {
-                    LessCatalog.UpdateCatalog(_projectItem, options);
-                    await CompilerService.CompileAsync(options);
-                }
-                else
-                {
-                    await CompilerService.CompileProjectAsync(_projectItem.ContainingProject);
-                }
+                LessCatalog.UpdateFile(_project, options);
+
+                if (await LessCatalog.EnsureCatalog(_project))
+                    await CompilerService.CompileAsync(options, _project);
             }
         }
     }

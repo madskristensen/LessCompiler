@@ -7,7 +7,7 @@
 
     <Commands package="guidPackage">
         <Buttons>
-            <Button guid="guidPackageCmdSet" id="ReCompileAll" priority="0x0300" type="Button">
+            <Button guid="guidPackageCmdSet" id="ReCompileAll" priority="0x0470" type="Button">
                 <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_BUILD"/>
                 <Icon guid="ImageCatalogGuid" id="LESSStyleSheet" />
                 <CommandFlag>IconIsMoniker</CommandFlag>

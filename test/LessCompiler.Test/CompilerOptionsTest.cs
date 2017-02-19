@@ -95,5 +95,15 @@ namespace LessCompilerTest
             Assert.IsTrue(options.Compile);
             Assert.IsFalse(options.Minify);
         }
+
+        [TestMethod]
+        public void Underscore()
+        {
+            string lessFile = new FileInfo("..\\..\\artifacts\\_underscore.less").FullName;
+            var options = CompilerOptions.Parse(lessFile);
+
+            Assert.IsFalse(options.Compile);
+
+        }
     }
 }

@@ -2,12 +2,13 @@
 
 - [x] Install npm modules when VS starts
 - [x] Alert when the npm modules are installed when .less file is saved
-- [x] Compile parent .less files when child file changes
+- [x] Compile parent .less files when imported file changes
 - [x] Context menu command to enable compiler for project
 - [x] Adornment to toggle compilation per solution
 - [x] Command to compile less files in all enabled projects in solution
 - [x] Make project/solution compiler defaults configurable
-- [ ] Compile only parent files and not all files
+- [ ] Make indication that .css file generated
+- [ ] Show CompilerOptions in watermark tooltip
 
 Features that have a checkmark are complete and available for
 download in the

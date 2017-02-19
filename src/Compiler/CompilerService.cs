@@ -2,8 +2,10 @@
 using NUglify;
 using NUglify.Css;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Tasks = System.Threading.Tasks;
 
@@ -16,28 +18,58 @@ namespace LessCompiler
             if (!LessCatalog.Catalog.ContainsKey(project.UniqueName))
                 return;
 
-            CompilerOptions[] options = LessCatalog.Catalog[project.UniqueName].ToArray();
+            ProjectMap map = LessCatalog.Catalog[project.UniqueName];
+            var compileTasks = new List<Tasks.Task>();
 
-            foreach (CompilerOptions option in options)
+            foreach (CompilerOptions option in map.LessFiles.Keys)
             {
-                await CompileAsync(option);
+                if (option.Compile)
+                    compileTasks.Add(CompileSingleFile(option));
             }
+
+            await Tasks.Task.WhenAll(compileTasks);
+
+            VsHelpers.WriteStatus($"LESS files in solution compiled");
         }
 
-        public static async Tasks.Task CompileAsync(CompilerOptions options)
+        public static async Tasks.Task CompileAsync(CompilerOptions options, Project project)
         {
-            if (options == null || !options.Compile)
+            if (options == null || !LessCatalog.Catalog.ContainsKey(project.UniqueName))
                 return;
 
+            ProjectMap map = LessCatalog.Catalog[project.UniqueName];
+
+            IEnumerable<CompilerOptions> parents = map.LessFiles
+                .Where(l => l.Value.Exists(c => c == options))
+                .Select(l => l.Key)
+                .Union(new[] { options })
+                .Distinct();
+
+            var sw = new Stopwatch();
+            sw.Start();
+
+            var compilerTaks = new List<Tasks.Task>();
+
+            foreach (CompilerOptions parentOptions in parents.Where(p => p.Compile))
+            {
+                compilerTaks.Add(CompileSingleFile(parentOptions));
+            }
+
+            await Tasks.Task.WhenAll(compilerTaks);
+
+            sw.Stop();
+
+            VsHelpers.WriteStatus($"LESS file compiled in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
+        }
+
+        private static async Tasks.Task<bool> CompileSingleFile(CompilerOptions options)
+        {
             try
             {
                 VsHelpers.CheckFileOutOfSourceControl(options.OutputFilePath);
                 VsHelpers.CheckFileOutOfSourceControl(options.OutputFilePath + ".map");
 
-                var sw = new Stopwatch();
-                sw.Start();
                 CompilerResult result = await NodeProcess.ExecuteProcess(options);
-                sw.Stop();
 
                 Logger.Log($"{result.Arguments}");
 
@@ -52,12 +84,13 @@ namespace LessCompiler
                     Minify(options);
                 }
 
-                VsHelpers.WriteStatus($"LESS file compiled in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
+                return true;
             }
             catch (Exception ex)
             {
                 Logger.Log(ex);
                 VsHelpers.WriteStatus($"Error compiling LESS file. See Output Window for details");
+                return false;
             }
         }
 

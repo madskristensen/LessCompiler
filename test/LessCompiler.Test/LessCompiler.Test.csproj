@@ -53,6 +53,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="artifacts\_underscore.less" />
     <None Include="artifacts\defaults\customdefaults.less" />
     <None Include="artifacts\defaults\less.defaults" />
     <None Include="artifacts\sourcemap.less" />
