@@ -135,5 +135,9 @@ namespace LessCompiler
             return !(a == b);
         }
 
+        public override string ToString()
+        {
+            return Path.GetFileName(InputFilePath);
+        }
     }
 }

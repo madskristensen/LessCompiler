@@ -1,4 +1,5 @@
 ﻿using EnvDTE;
+using EnvDTE80;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,10 +9,19 @@ using System.Threading.Tasks;
 
 namespace LessCompiler
 {
-    public class ProjectMap
+    public class ProjectMap : IDisposable
     {
         private static string[] _ignore = { "\\node_modules\\", "\\bower_components\\", "\\jspm_packages\\", "\\lib\\", "\\vendor\\" };
         private static Regex _import = new Regex(@"@import ([""'])(?<url>[^""']+)\1|url\(([""']?)(?<url>[^""')]+)\2\)", RegexOptions.IgnoreCase);
+        private ProjectItemsEvents _events;
+
+        public ProjectMap()
+        {
+            _events = ((Events2)VsHelpers.DTE.Events).ProjectItemsEvents;
+            _events.ItemAdded += OnProjectItemAdded;
+            _events.ItemRemoved += OnProjectItemRemoved;
+            _events.ItemRenamed += OnProjectItemRenamed;
+        }
 
         public Dictionary<CompilerOptions, List<CompilerOptions>> LessFiles { get; } = new Dictionary<CompilerOptions, List<CompilerOptions>>();
 
@@ -44,6 +54,21 @@ namespace LessCompiler
                 LessFiles.Remove(existing);
 
             AddFile(options.InputFilePath);
+        }
+
+        public void RemoveFile(CompilerOptions options)
+        {
+            if (options == null)
+                return;
+
+            if (LessFiles.ContainsKey(options))
+                LessFiles.Remove(options);
+
+            foreach (CompilerOptions file in LessFiles.Keys)
+            {
+                if (LessFiles[file].Contains(options))
+                    LessFiles[file].Remove(options);
+            }
         }
 
         private void AddFile(string lessFilePath)
@@ -104,6 +129,45 @@ namespace LessCompiler
             }
 
             return files;
+        }
+
+        private async void OnProjectItemRenamed(ProjectItem item, string OldName)
+        {
+            if (!item.IsSupportedFile())
+                return;
+
+            LessFiles.Clear();
+            await BuildMap(item.ContainingProject);
+        }
+
+        private void OnProjectItemRemoved(ProjectItem item)
+        {
+            if (!item.IsSupportedFile())
+                return;
+
+            CompilerOptions existing = LessFiles.Keys.FirstOrDefault(c => c.InputFilePath == item.FilePath());
+
+            RemoveFile(existing);
+        }
+
+        private void OnProjectItemAdded(ProjectItem item)
+        {
+            if (!item.IsSupportedFile())
+                return;
+
+            AddFile(item.FilePath());
+        }
+
+        public void Dispose()
+        {
+            if (_events != null)
+            {
+                _events.ItemAdded -= OnProjectItemAdded;
+                _events.ItemRemoved -= OnProjectItemRemoved;
+                _events.ItemRenamed -= OnProjectItemRenamed;
+            }
+
+            LessFiles.Clear();
         }
     }
 }

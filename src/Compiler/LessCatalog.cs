@@ -13,12 +13,22 @@ namespace LessCompiler
         {
             Catalog = new Dictionary<string, ProjectMap>();
             _events = VsHelpers.DTE.Events.SolutionEvents;
-            _events.AfterClosing += delegate { Catalog.Clear(); };
+            _events.AfterClosing += OnSolutionClosed;
         }
 
         public static Dictionary<string, ProjectMap> Catalog
         {
             get;
+        }
+
+        private static void OnSolutionClosed()
+        {
+            foreach (ProjectMap project in Catalog.Values)
+            {
+                project.Dispose();
+            }
+
+            Catalog.Clear();
         }
 
         public static async Task<bool> EnsureCatalog(Project project)

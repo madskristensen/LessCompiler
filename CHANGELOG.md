@@ -7,6 +7,7 @@
 - [x] Adornment to toggle compilation per solution
 - [x] Command to compile less files in all enabled projects in solution
 - [x] Make project/solution compiler defaults configurable
+- [x] Adapt to renames, additions and deletions from project
 - [ ] Make indication that .css file generated
 - [ ] Show CompilerOptions in watermark tooltip
 
