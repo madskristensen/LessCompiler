@@ -35,7 +35,7 @@ namespace LessCompiler
             if (!_project.SupportsCompilation())
                 return;
 
-            _view.Properties.AddProperty("adornment", new Adornment(_view, _project));
+            _view.Properties.AddProperty("adornment", new LessAdornment(_view, _project));
 
             if (Settings.IsEnabled(_project))
                 await LessCatalog.EnsureCatalog(_project);

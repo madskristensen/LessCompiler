@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Tasks = System.Threading.Tasks;
+using EnvDTE80;
 
 namespace LessCompiler
 {
@@ -96,7 +97,7 @@ namespace LessCompiler
 
         public static bool SupportsCompilation(this Project project)
         {
-            if (project?.Properties == null)
+            if (project?.Properties == null || project.IsKind(ProjectKinds.vsProjectKindSolutionFolder))
                 return false;
 
             return true;

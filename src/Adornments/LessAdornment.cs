@@ -10,11 +10,11 @@ using System.Windows.Threading;
 
 namespace LessCompiler
 {
-    class Adornment : TextBlock
+    class LessAdornment : TextBlock
     {
         private Project _project;
 
-        public Adornment(IWpfTextView view, Project project)
+        public LessAdornment(IWpfTextView view, Project project)
         {
             _project = project;
             Visibility = Visibility.Hidden;

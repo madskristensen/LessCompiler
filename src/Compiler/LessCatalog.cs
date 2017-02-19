@@ -31,6 +31,7 @@ namespace LessCompiler
             Catalog.Clear();
         }
 
+        // Todo: make this thread safe so it only runs once
         public static async Task<bool> EnsureCatalog(Project project)
         {
             if (Catalog.ContainsKey(project.UniqueName))
