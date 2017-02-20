@@ -65,7 +65,9 @@ namespace LessCompiler
             try
             {
                 VsHelpers.CheckFileOutOfSourceControl(options.OutputFilePath);
-                VsHelpers.CheckFileOutOfSourceControl(options.OutputFilePath + ".map");
+
+                if (options.SourceMap)
+                    VsHelpers.CheckFileOutOfSourceControl(options.OutputFilePath + ".map");
 
                 CompilerResult result = await NodeProcess.ExecuteProcess(options);
 

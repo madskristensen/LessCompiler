@@ -9,7 +9,7 @@ namespace LessCompiler
         private static Regex _regex = new Regex(@"\slessc(?<args>\s.+)(\*/)?", RegexOptions.IgnoreCase | RegexOptions.Multiline);
         private static Regex _outFile = new Regex(@"\s((?:""|')(?<out>.+\.css)(?:""|')|(?<out>[^\s=]+\.css))", RegexOptions.Compiled);
 
-        public CompilerOptions(string lessFilePath)
+        private CompilerOptions(string lessFilePath)
         {
             InputFilePath = lessFilePath;
             OutputFilePath = Path.ChangeExtension(lessFilePath, ".css");
@@ -27,6 +27,7 @@ namespace LessCompiler
         public string Arguments { get; set; }
         public bool Minify { get; set; } = true;
         public bool Compile { get; set; } = true;
+        public bool SourceMap { get; set; }
 
         public static CompilerOptions Parse(string lessFilePath, string lessContent = null)
         {
@@ -52,6 +53,9 @@ namespace LessCompiler
                 string inFile = Path.GetFileName(options.InputFilePath);
                 options.Arguments = $"\"{inFile}\" {argsMatch.Groups["args"].Value.TrimEnd('*', '/').Trim()}";
             }
+
+            // Source map
+            options.SourceMap = options.Arguments.IndexOf("--source-map", StringComparison.OrdinalIgnoreCase) > -1;
 
             // OutputFileName
             Match outMatch = _outFile.Match(options.Arguments);
