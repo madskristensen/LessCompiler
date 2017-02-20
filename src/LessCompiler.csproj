@@ -53,11 +53,12 @@
     <Compile Include="Adornments\CssAdornment.cs" />
     <Compile Include="Compiler\LessCatalog.cs" />
     <Compile Include="Compiler\ProjectMap.cs" />
-    <Compile Include="Compiler\SaveHandler.cs" />
+    <Compile Include="Commands\SaveHandler.cs" />
     <Compile Include="Compiler\CompilerOptions.cs" />
     <Compile Include="Compiler\CompilerResult.cs" />
     <Compile Include="Compiler\CompilerService.cs" />
     <Compile Include="Commands\ReCompileAll.cs" />
+    <Compile Include="Helpers\AsyncLock.cs" />
     <Compile Include="Settings\Settings.cs" />
     <Compile Include="Helpers\Logger.cs" />
     <Compile Include="Helpers\VsHelpers.cs" />

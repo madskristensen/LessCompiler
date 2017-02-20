@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
+using System.Windows.Threading;
 
 namespace LessCompiler
 {
@@ -22,7 +23,7 @@ namespace LessCompiler
         [Import]
         private ITextDocumentFactoryService DocumentService { get; set; }
 
-        public async void VsTextViewCreated(IVsTextView textViewAdapter)
+        public void VsTextViewCreated(IVsTextView textViewAdapter)
         {
             _view = AdaptersFactory.GetWpfTextView(textViewAdapter);
 
@@ -31,14 +32,16 @@ namespace LessCompiler
 
             _project = VsHelpers.DTE.Solution.FindProjectItem(doc.FilePath)?.ContainingProject;
 
-            // Test for Properties to exclude misc files
-            if (!_project.SupportsCompilation())
-                return;
+            Microsoft.VisualStudio.Shell.ThreadHelper.Generic.BeginInvoke(DispatcherPriority.ApplicationIdle, async () =>
+            {
+                if (!_project.SupportsCompilation())
+                    return;
 
-            _view.Properties.AddProperty("adornment", new LessAdornment(_view, _project));
+                _view.Properties.AddProperty("adornment", new LessAdornment(_view, _project));
 
-            if (Settings.IsEnabled(_project))
-                await LessCatalog.EnsureCatalog(_project);
+                if (Settings.IsEnabled(_project))
+                    await LessCatalog.EnsureCatalog(_project);
+            });
 
             doc.FileActionOccurred += DocumentSaved;
         }
@@ -55,6 +58,9 @@ namespace LessCompiler
             else if (NodeProcess.IsReadyToExecute())
             {
                 var options = CompilerOptions.Parse(e.FilePath, _view.TextBuffer.CurrentSnapshot.GetText());
+
+                if (options == null)
+                    return;
 
                 LessCatalog.UpdateFile(_project, options);
 

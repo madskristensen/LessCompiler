@@ -6,6 +6,7 @@ using System;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -29,22 +30,27 @@ namespace LessCompiler
             if (!Path.GetExtension(doc.FilePath).Equals(".css", StringComparison.OrdinalIgnoreCase))
                 return;
 
-            ThreadHelper.Generic.BeginInvoke(DispatcherPriority.ApplicationIdle, () =>
+            ThreadHelper.Generic.BeginInvoke(DispatcherPriority.ApplicationIdle, async () =>
             {
-                EnvDTE.Project project = VsHelpers.DTE.Solution.FindProjectItem(doc.FilePath)?.ContainingProject;
-
-                if (project == null || !Settings.IsEnabled(project) || !LessCatalog.Catalog.ContainsKey(project.UniqueName))
-                    return;
-
-                ProjectMap map = LessCatalog.Catalog[project.UniqueName];
-
-                bool isOutput = map.LessFiles.Keys.Any(l =>
-                    l.OutputFilePath.Equals(doc.FilePath, StringComparison.OrdinalIgnoreCase) ||
-                    (l.Minify && l.OutputFilePath.Equals(doc.FilePath.Replace(".min.css", ".css"), StringComparison.OrdinalIgnoreCase)));
+                bool isOutput = await ThreadHelper.JoinableTaskFactory.RunAsync(() => IsOutput(doc.FilePath));
 
                 if (isOutput)
                     textView.Properties.GetOrCreateSingletonProperty(() => new CssAdornment(textView));
             });
+        }
+
+        private async Task<bool> IsOutput(string fileName)
+        {
+            EnvDTE.Project project = VsHelpers.DTE.Solution.FindProjectItem(fileName)?.ContainingProject;
+
+            if (project == null || !Settings.IsEnabled(project) || !await LessCatalog.EnsureCatalog(project))
+                return false;
+
+            ProjectMap map = LessCatalog.Catalog[project.UniqueName];
+
+            return map.LessFiles.Keys.Any(l =>
+                 l.OutputFilePath.Equals(fileName, StringComparison.OrdinalIgnoreCase) ||
+                (l.Minify && l.OutputFilePath.Equals(fileName.Replace(".min.css", ".css"), StringComparison.OrdinalIgnoreCase)));
         }
     }
 

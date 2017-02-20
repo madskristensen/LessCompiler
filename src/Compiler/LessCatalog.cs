@@ -1,4 +1,5 @@
 ﻿using EnvDTE;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@ namespace LessCompiler
     {
         private static string[] _ignore = { "\\node_modules\\", "\\bower_components\\", "\\jspm_packages\\", "\\lib\\", "\\vendor\\" };
         private static SolutionEvents _events;
+        private static AsyncLock _lock = new AsyncLock();
 
         static LessCatalog()
         {
@@ -21,6 +23,41 @@ namespace LessCompiler
             get;
         }
 
+        public static async Task<bool> EnsureCatalog(Project project)
+        {
+            if (project == null)
+                return false;
+
+            if (Catalog.ContainsKey(project.UniqueName))
+                return true;
+
+            using (await _lock.LockAsync())
+            {
+                try
+                {
+                    var map = new ProjectMap();
+                    await map.BuildMap(project);
+
+                    Catalog[project.UniqueName] = map;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log(ex);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static void UpdateFile(Project project, CompilerOptions options)
+        {
+            if (project == null || options == null || !Catalog.TryGetValue(project.UniqueName, out ProjectMap map))
+                return;
+
+            map.UpdateFile(options);
+        }
+
         private static void OnSolutionClosed()
         {
             foreach (ProjectMap project in Catalog.Values)
@@ -29,28 +66,6 @@ namespace LessCompiler
             }
 
             Catalog.Clear();
-        }
-
-        // Todo: make this thread safe so it only runs once
-        public static async Task<bool> EnsureCatalog(Project project)
-        {
-            if (Catalog.ContainsKey(project.UniqueName))
-                return true;
-
-            var map = new ProjectMap();
-            await map.BuildMap(project);
-
-            Catalog[project.UniqueName] = map;
-            return true;
-        }
-
-        public static void UpdateFile(Project project, CompilerOptions options)
-        {
-            if (project == null || !Catalog.ContainsKey(project.UniqueName))
-                return;
-
-            ProjectMap map = Catalog[project.UniqueName];
-            map.UpdateFile(options);
         }
     }
 }

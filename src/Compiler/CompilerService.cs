@@ -16,10 +16,9 @@ namespace LessCompiler
     {
         public static async Tasks.Task CompileProjectAsync(Project project)
         {
-            if (!LessCatalog.Catalog.ContainsKey(project.UniqueName))
+            if (project == null || !LessCatalog.Catalog.TryGetValue(project.UniqueName, out ProjectMap map))
                 return;
 
-            ProjectMap map = LessCatalog.Catalog[project.UniqueName];
             var compileTasks = new List<Tasks.Task>();
 
             foreach (CompilerOptions option in map.LessFiles.Keys)
@@ -35,10 +34,8 @@ namespace LessCompiler
 
         public static async Tasks.Task CompileAsync(CompilerOptions options, Project project)
         {
-            if (options == null || !LessCatalog.Catalog.ContainsKey(project.UniqueName))
+            if (options == null || project == null || !LessCatalog.Catalog.TryGetValue(project.UniqueName, out ProjectMap map))
                 return;
-
-            ProjectMap map = LessCatalog.Catalog[project.UniqueName];
 
             IEnumerable<CompilerOptions> parents = map.LessFiles
                 .Where(l => l.Value.Exists(c => c == options))

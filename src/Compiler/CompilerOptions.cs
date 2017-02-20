@@ -30,6 +30,9 @@ namespace LessCompiler
 
         public static CompilerOptions Parse(string lessFilePath, string lessContent = null)
         {
+            if (!File.Exists(lessFilePath))
+                return null;
+
             lessContent = lessContent ?? File.ReadAllText(lessFilePath);
             var options = new CompilerOptions(lessFilePath);
 

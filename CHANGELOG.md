@@ -1,15 +1,6 @@
 # Road map
 
-- [x] Install npm modules when VS starts
-- [x] Alert when the npm modules are installed when .less file is saved
-- [x] Compile parent .less files when imported file changes
-- [x] Context menu command to enable compiler for project
-- [x] Adornment to toggle compilation per solution
-- [x] Command to compile less files in all enabled projects in solution
-- [x] Make project/solution compiler defaults configurable
-- [x] Adapt to renames, additions and deletions from project
-- [x] Make indication that .css file generated
-- [ ] Show CompilerOptions in watermark tooltip
+- [ ] Nothing yet...
 
 Features that have a checkmark are complete and available for
 download in the
@@ -19,6 +10,18 @@ download in the
 
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
+
+## 0.8
+
+- [x] Install npm modules when VS starts
+- [x] Alert when the npm modules are installed when .less file is saved
+- [x] Compile parent .less files when imported file changes
+- [x] Context menu command to enable compiler for project
+- [x] Adornment to toggle compilation per solution
+- [x] Command to compile less files in all enabled projects in solution
+- [x] Make project/solution compiler defaults configurable
+- [x] Adapt to renames, additions and deletions from project
+- [x] Make indication that .css file generated
 
 ## 0.7
 

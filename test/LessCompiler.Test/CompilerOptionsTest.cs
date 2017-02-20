@@ -12,7 +12,7 @@ namespace LessCompilerTest
         [TestInitialize]
         public void Setup()
         {
-            _lessFilePath = Path.Combine(Path.GetTempPath(), "foo.less");
+            _lessFilePath = new FileInfo("..\\..\\artifacts\\autoprefix.less").FullName;
         }
 
         [TestMethod]
@@ -20,7 +20,7 @@ namespace LessCompilerTest
         {
             var args = CompilerOptions.Parse(_lessFilePath, "// lessc --compress --csscomb=yandex --autoprefix=\">1%\"");
 
-            Assert.AreEqual("\"foo.less\" --compress --csscomb=yandex --autoprefix=\">1%\" \"foo.css\"", args.Arguments);
+            Assert.AreEqual("\"autoprefix.less\" --compress --csscomb=yandex --autoprefix=\">1%\" \"autoprefix.css\"", args.Arguments);
         }
 
         [TestMethod]
@@ -28,7 +28,7 @@ namespace LessCompilerTest
         {
             var options = CompilerOptions.Parse(_lessFilePath, "/* lessc -x out/hat.css */");
 
-            Assert.AreEqual("\"foo.less\" -x out/hat.css", options.Arguments);
+            Assert.AreEqual("\"autoprefix.less\" -x out/hat.css", options.Arguments);
             Assert.AreEqual(options.OutputFilePath, Path.Combine(Path.GetDirectoryName(_lessFilePath), "out\\hat.css"));
         }
 
@@ -37,7 +37,7 @@ namespace LessCompilerTest
         {
             var options = CompilerOptions.Parse(_lessFilePath, "/* no-compile no-minify */");
 
-            Assert.AreEqual("\"foo.less\" --relative-urls --autoprefix=\">0%\" --csscomb=zen \"foo.css\"", options.Arguments);
+            Assert.AreEqual("\"autoprefix.less\" --relative-urls --autoprefix=\">0%\" --csscomb=zen \"autoprefix.css\"", options.Arguments);
             Assert.AreEqual(options.OutputFilePath, Path.ChangeExtension(_lessFilePath, ".css"));
             Assert.IsFalse(options.Compile);
             Assert.IsFalse(options.Minify);
@@ -48,7 +48,7 @@ namespace LessCompilerTest
         {
             var options = CompilerOptions.Parse(_lessFilePath, "/* no-compile no-minify lessc -ru */");
 
-            Assert.AreEqual("\"foo.less\" -ru \"foo.css\"", options.Arguments);
+            Assert.AreEqual("\"autoprefix.less\" -ru \"autoprefix.css\"", options.Arguments);
             Assert.AreEqual(options.OutputFilePath, Path.ChangeExtension(_lessFilePath, ".css"));
             Assert.IsFalse(options.Compile);
             Assert.IsFalse(options.Minify);
