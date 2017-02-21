@@ -49,7 +49,7 @@ namespace LessCompiler
             {
                 Project project = GetDTEProject(hierarchy);
 
-                if (project.SupportsCompilation() && Settings.IsEnabled(project))
+                if (project.SupportsCompilation() && project.IsLessCompilationEnabled())
                 {
                     if (await LessCatalog.EnsureCatalog(project))
                         await CompilerService.CompileProjectAsync(project);

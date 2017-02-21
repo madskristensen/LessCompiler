@@ -51,7 +51,7 @@ namespace LessCompilerTest
         private static async Task<CompilerResult> Execute(string fileName)
         {
             var less = new FileInfo("..\\..\\artifacts\\" + fileName);
-            var options = CompilerOptions.Parse(less.FullName);
+            CompilerOptions options = await CompilerOptions.Parse(less.FullName);
             return await NodeProcess.ExecuteProcess(options);
         }
     }

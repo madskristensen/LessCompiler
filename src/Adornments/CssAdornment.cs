@@ -43,7 +43,7 @@ namespace LessCompiler
         {
             EnvDTE.Project project = VsHelpers.DTE.Solution.FindProjectItem(fileName)?.ContainingProject;
 
-            if (project == null || !Settings.IsEnabled(project) || !await LessCatalog.EnsureCatalog(project))
+            if (!project.SupportsCompilation() || !project.IsLessCompilationEnabled() || !await LessCatalog.EnsureCatalog(project))
                 return false;
 
             ProjectMap map = LessCatalog.Catalog[project.UniqueName];

@@ -2,11 +2,11 @@
 using EnvDTE80;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Diagnostics;
 
 namespace LessCompiler
 {
@@ -28,36 +28,31 @@ namespace LessCompiler
 
         public async Task BuildMap(Project project)
         {
-            string root = project.GetRootFolder();
-
-            if (string.IsNullOrEmpty(root) || !Directory.Exists(root))
+            if (!project.SupportsCompilation() || !project.IsLessCompilationEnabled())
                 return;
 
-            await Task.Run(() =>
+            var sw = new Stopwatch();
+            sw.Start();
+
+            IEnumerable<string> lessFiles = FindLessFiles(project.ProjectItems);
+
+            foreach (string file in lessFiles)
             {
-                var sw = new Stopwatch();
-                sw.Start();
+                await AddFile(file);
+            }
 
-                IEnumerable<string> lessFiles = FindLessFiles(project.ProjectItems);
-
-                foreach (string file in lessFiles)
-                {
-                    AddFile(file);
-                }
-
-                sw.Stop();
-                Logger.Log($"LESS file catalog for {project.Name} built in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
-            });
+            sw.Stop();
+            Logger.Log($"LESS file catalog for {project.Name} built in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
         }
 
-        public void UpdateFile(CompilerOptions options)
+        public async Task UpdateFile(CompilerOptions options)
         {
             CompilerOptions existing = LessFiles.Keys.FirstOrDefault(c => c == options);
 
             if (existing != null)
                 LessFiles.Remove(existing);
 
-            AddFile(options.InputFilePath);
+            await AddFile(options.InputFilePath);
         }
 
         public void RemoveFile(CompilerOptions options)
@@ -75,23 +70,24 @@ namespace LessCompiler
             }
         }
 
-        private void AddFile(string lessFilePath)
+        private async Task AddFile(string lessFilePath)
         {
             if (LessFiles.Keys.Any(c => c.InputFilePath == lessFilePath))
                 return;
 
             string lessContent = File.ReadAllText(lessFilePath);
 
-            var options = CompilerOptions.Parse(lessFilePath, lessContent);
+            CompilerOptions options = await CompilerOptions.Parse(lessFilePath, lessContent);
             LessFiles.Add(options, new List<CompilerOptions>());
 
-            AddOption(options, lessContent);
+            await AddOption(options, lessContent);
         }
 
-        private void AddOption(CompilerOptions options, string lessContent = null)
+        private async Task AddOption(CompilerOptions options, string lessContent = null)
         {
             lessContent = lessContent ?? File.ReadAllText(options.InputFilePath);
             string lessDir = Path.GetDirectoryName(options.InputFilePath);
+
             foreach (Match match in _import.Matches(lessContent))
             {
                 string childFilePath = new FileInfo(Path.Combine(lessDir, match.Groups["url"].Value)).FullName;
@@ -103,8 +99,8 @@ namespace LessCompiler
 
                 if (import == null)
                 {
-                    import = CompilerOptions.Parse(childFilePath);
-                    AddFile(childFilePath);
+                    import = await CompilerOptions.Parse(childFilePath);
+                    await AddFile(childFilePath);
                 }
 
                 LessFiles[options].Add(import);
@@ -127,26 +123,6 @@ namespace LessCompiler
             return files;
         }
 
-        //private static IEnumerable<string> FindLessFiles(string folder, List<string> files = null)
-        //{
-        //    if (files == null)
-        //        files = new List<string>();
-
-        //    foreach (string file in Directory.EnumerateFiles(folder, "*.less"))
-        //    {
-        //        if (!_ignore.Any(i => file.IndexOf(i, StringComparison.OrdinalIgnoreCase) > -1))
-        //            files.Add(file);
-        //    }
-
-        //    foreach (string dir in Directory.EnumerateDirectories(folder))
-        //    {
-        //        if (!_ignore.Any(i => dir.IndexOf(i, StringComparison.OrdinalIgnoreCase) > -1))
-        //            FindLessFiles(dir, files);
-        //    }
-
-        //    return files;
-        //}
-
         private async void OnProjectItemRenamed(ProjectItem item, string OldName)
         {
             if (!item.IsSupportedFile(out string filePath))
@@ -166,12 +142,12 @@ namespace LessCompiler
             RemoveFile(existing);
         }
 
-        private void OnProjectItemAdded(ProjectItem item)
+        private async void OnProjectItemAdded(ProjectItem item)
         {
             if (!item.IsSupportedFile(out string filePath))
                 return;
 
-            AddFile(filePath);
+            await AddFile(filePath);
         }
 
         public void Dispose()

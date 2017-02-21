@@ -13,12 +13,16 @@ namespace LessCompiler
         private static DTE2 _dte = VsHelpers.DTE;
         private static IVsSolution2 _solution = (IVsSolution2)ServiceProvider.GlobalProvider.GetService(typeof(SVsSolution));
 
-        public static void Enable(Project project, bool isEnabled)
+        public static void EnableLessCompilation(this Project project, bool isEnabled)
         {
             if (_dte.Solution == null)
                 return;
 
             string guid = project.UniqueGuid();
+
+            if (string.IsNullOrEmpty(guid))
+                return;
+
             string value = guid;
 
             if (_dte.Solution.Globals.VariableExists[SettingKey])
@@ -43,14 +47,18 @@ namespace LessCompiler
             Changed?.Invoke(project, new SettingsChangedEventArgs(isEnabled));
         }
 
-        public static bool IsEnabled(Project project)
+        public static bool IsLessCompilationEnabled(this Project project)
         {
-            if (_dte.Solution == null)
+            if (project == null || _dte.Solution == null)
                 return false;
 
             bool isSet = _dte.Solution.Globals.VariableExists[SettingKey];
+            string guid = project.UniqueGuid();
 
-            if (isSet && _dte.Solution.Globals[SettingKey].ToString().Contains(project.UniqueGuid()))
+            if (string.IsNullOrEmpty(guid))
+                return false;
+
+            if (isSet && _dte.Solution.Globals[SettingKey].ToString().Contains(guid))
             {
                 return true;
             }
@@ -58,8 +66,11 @@ namespace LessCompiler
             return false;
         }
 
-        public static string UniqueGuid(this Project project)
+        private static string UniqueGuid(this Project project)
         {
+            if (project == null)
+                return null;
+
             if (_solution.GetProjectOfUniqueName(project.UniqueName, out var hierarchy) == VSConstants.S_OK)
                 if (_solution.GetGuidOfProject(hierarchy, out Guid projectGuid) == VSConstants.S_OK)
                     return projectGuid.ToString();

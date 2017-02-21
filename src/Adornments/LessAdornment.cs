@@ -43,7 +43,7 @@ namespace LessCompiler
 
         private void Initialize()
         {
-            bool enabled = Settings.IsEnabled(_project);
+            bool enabled = _project.IsLessCompilationEnabled();
 
             SetText(enabled);
 
@@ -78,8 +78,8 @@ namespace LessCompiler
 
         private void OnClick(object sender, MouseButtonEventArgs e)
         {
-            bool enabled = Settings.IsEnabled(_project);
-            Settings.Enable(_project, !enabled);
+            bool enabled = _project.IsLessCompilationEnabled();
+            _project.EnableLessCompilation(!enabled);
 
             e.Handled = true;
         }

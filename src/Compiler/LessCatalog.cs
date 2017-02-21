@@ -7,7 +7,6 @@ namespace LessCompiler
 {
     public static class LessCatalog
     {
-        private static string[] _ignore = { "\\node_modules\\", "\\bower_components\\", "\\jspm_packages\\", "\\lib\\", "\\vendor\\" };
         private static SolutionEvents _events;
         private static AsyncLock _lock = new AsyncLock();
 
@@ -50,12 +49,12 @@ namespace LessCompiler
             return true;
         }
 
-        public static void UpdateFile(Project project, CompilerOptions options)
+        public static async Task UpdateFile(Project project, CompilerOptions options)
         {
             if (project == null || options == null || !Catalog.TryGetValue(project.UniqueName, out ProjectMap map))
                 return;
 
-            map.UpdateFile(options);
+            await map.UpdateFile(options);
         }
 
         private static void OnSolutionClosed()

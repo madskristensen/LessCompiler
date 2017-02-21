@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace LessCompiler
 {
@@ -29,12 +30,12 @@ namespace LessCompiler
         public bool Compile { get; set; } = true;
         public bool SourceMap { get; set; }
 
-        public static CompilerOptions Parse(string lessFilePath, string lessContent = null)
+        public static async Task<CompilerOptions> Parse(string lessFilePath, string lessContent = null)
         {
             if (!File.Exists(lessFilePath))
                 return null;
 
-            lessContent = lessContent ?? File.ReadAllText(lessFilePath);
+            lessContent = lessContent ?? await VsHelpers.ReadFileAsync(lessFilePath);
             var options = new CompilerOptions(lessFilePath);
 
             // Compile

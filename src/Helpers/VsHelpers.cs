@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace LessCompiler
 {
@@ -148,6 +149,15 @@ namespace LessCompiler
             FilePath = item.FilePath();
             string ext = Path.GetExtension(item.FilePath());
             return ext.Equals(".less", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static async Task<string> ReadFileAsync(string filePath)
+        {
+            using (var stream = new StreamReader(filePath))
+            {
+                return await stream.ReadToEndAsync();
+            }
+
         }
     }
 

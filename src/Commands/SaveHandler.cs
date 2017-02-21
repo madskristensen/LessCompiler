@@ -39,7 +39,7 @@ namespace LessCompiler
 
                 _view.Properties.AddProperty("adornment", new LessAdornment(_view, _project));
 
-                if (Settings.IsEnabled(_project))
+                if (_project.IsLessCompilationEnabled())
                     await LessCatalog.EnsureCatalog(_project);
             });
 
@@ -48,7 +48,7 @@ namespace LessCompiler
 
         private async void DocumentSaved(object sender, TextDocumentFileActionEventArgs e)
         {
-            if (e.FileActionType != FileActionTypes.ContentSavedToDisk || !Settings.IsEnabled(_project))
+            if (e.FileActionType != FileActionTypes.ContentSavedToDisk || !_project.IsLessCompilationEnabled())
                 return;
 
             if (NodeProcess.IsInstalling)
@@ -57,12 +57,12 @@ namespace LessCompiler
             }
             else if (NodeProcess.IsReadyToExecute())
             {
-                var options = CompilerOptions.Parse(e.FilePath, _view.TextBuffer.CurrentSnapshot.GetText());
+                CompilerOptions options = await CompilerOptions.Parse(e.FilePath, _view.TextBuffer.CurrentSnapshot.GetText());
 
                 if (options == null)
                     return;
 
-                LessCatalog.UpdateFile(_project, options);
+                await LessCatalog.UpdateFile(_project, options);
 
                 if (await LessCatalog.EnsureCatalog(_project))
                     await CompilerService.CompileAsync(options, _project);

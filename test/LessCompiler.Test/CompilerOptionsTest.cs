@@ -1,6 +1,7 @@
 ﻿using LessCompiler;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace LessCompilerTest
 {
@@ -16,26 +17,26 @@ namespace LessCompilerTest
         }
 
         [TestMethod]
-        public void OverrideDefaults()
+        public async Task OverrideDefaults()
         {
-            var args = CompilerOptions.Parse(_lessFilePath, "// lessc --compress --csscomb=yandex --autoprefix=\">1%\"");
+            CompilerOptions args = await CompilerOptions.Parse(_lessFilePath, "// lessc --compress --csscomb=yandex --autoprefix=\">1%\"");
 
             Assert.AreEqual("\"autoprefix.less\" --compress --csscomb=yandex --autoprefix=\">1%\" \"autoprefix.css\"", args.Arguments);
         }
 
         [TestMethod]
-        public void ShorthandSyntax()
+        public async Task ShorthandSyntax()
         {
-            var options = CompilerOptions.Parse(_lessFilePath, "/* lessc -x out/hat.css */");
+            CompilerOptions options = await CompilerOptions.Parse(_lessFilePath, "/* lessc -x out/hat.css */");
 
             Assert.AreEqual("\"autoprefix.less\" -x out/hat.css", options.Arguments);
             Assert.AreEqual(options.OutputFilePath, Path.Combine(Path.GetDirectoryName(_lessFilePath), "out\\hat.css"));
         }
 
         [TestMethod]
-        public void NoCompileNoMinify()
+        public async Task NoCompileNoMinify()
         {
-            var options = CompilerOptions.Parse(_lessFilePath, "/* no-compile no-minify */");
+            CompilerOptions options = await CompilerOptions.Parse(_lessFilePath, "/* no-compile no-minify */");
 
             Assert.AreEqual("\"autoprefix.less\" --relative-urls --autoprefix=\">0%\" --csscomb=zen \"autoprefix.css\"", options.Arguments);
             Assert.AreEqual(options.OutputFilePath, Path.ChangeExtension(_lessFilePath, ".css"));
@@ -44,9 +45,9 @@ namespace LessCompilerTest
         }
 
         [TestMethod]
-        public void NoCompileNoMinifyPlusCustom()
+        public async Task NoCompileNoMinifyPlusCustom()
         {
-            var options = CompilerOptions.Parse(_lessFilePath, "/* no-compile no-minify lessc -ru */");
+            CompilerOptions options = await CompilerOptions.Parse(_lessFilePath, "/* no-compile no-minify lessc -ru */");
 
             Assert.AreEqual("\"autoprefix.less\" -ru \"autoprefix.css\"", options.Arguments);
             Assert.AreEqual(options.OutputFilePath, Path.ChangeExtension(_lessFilePath, ".css"));
@@ -55,9 +56,9 @@ namespace LessCompilerTest
         }
 
         [TestMethod]
-        public void OnlyOutFile()
+        public async Task OnlyOutFile()
         {
-            var options = CompilerOptions.Parse(_lessFilePath, "/* lessc out.css */");
+            CompilerOptions options = await CompilerOptions.Parse(_lessFilePath, "/* lessc out.css */");
 
             Assert.AreEqual(options.OutputFilePath, Path.Combine(Path.GetDirectoryName(_lessFilePath), "out.css"));
             Assert.IsTrue(options.Compile);
@@ -65,9 +66,9 @@ namespace LessCompilerTest
         }
 
         [TestMethod]
-        public void OutFileWithSpaces()
+        public async Task OutFileWithSpaces()
         {
-            var options = CompilerOptions.Parse(_lessFilePath, "/* lessc --source-map=foo.css.map \"out file.css\" */");
+            CompilerOptions options = await CompilerOptions.Parse(_lessFilePath, "/* lessc --source-map=foo.css.map \"out file.css\" */");
 
             Assert.AreEqual(options.OutputFilePath, Path.Combine(Path.GetDirectoryName(_lessFilePath), "out file.css"));
             Assert.IsTrue(options.Compile);
@@ -75,9 +76,9 @@ namespace LessCompilerTest
         }
 
         [TestMethod]
-        public void SourceMapOnly()
+        public async Task SourceMapOnly()
         {
-            var options = CompilerOptions.Parse(_lessFilePath, "/* lessc --source-map=foo.css.map */");
+            CompilerOptions options = await CompilerOptions.Parse(_lessFilePath, "/* lessc --source-map=foo.css.map */");
 
             Assert.AreEqual(options.OutputFilePath, Path.ChangeExtension(_lessFilePath, ".css"));
             Assert.IsTrue(options.Compile);
@@ -85,10 +86,10 @@ namespace LessCompilerTest
         }
 
         [TestMethod]
-        public void CustomDefaults()
+        public async Task CustomDefaults()
         {
             string lessFile = new FileInfo("..\\..\\artifacts\\defaults\\customdefaults.less").FullName;
-            var options = CompilerOptions.Parse(lessFile);
+            CompilerOptions options = await CompilerOptions.Parse(lessFile);
 
             Assert.AreEqual("\"customdefaults.less\" --source-map \"customdefaults.css\"", options.Arguments);
             Assert.AreEqual(options.OutputFilePath, Path.ChangeExtension(lessFile, ".css"));
@@ -97,10 +98,10 @@ namespace LessCompilerTest
         }
 
         [TestMethod]
-        public void Underscore()
+        public async Task Underscore()
         {
             string lessFile = new FileInfo("..\\..\\artifacts\\_underscore.less").FullName;
-            var options = CompilerOptions.Parse(lessFile);
+            CompilerOptions options = await CompilerOptions.Parse(lessFile);
 
             Assert.IsFalse(options.Compile);
 
