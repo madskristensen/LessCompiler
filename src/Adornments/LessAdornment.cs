@@ -43,13 +43,13 @@ namespace LessCompiler
 
             var header = new TextBlock()
             {
-                FontSize = 17,
+                FontSize = 20,
                 Text = "LESS Compiler"
             };
 
             _text = new TextBlock
             {
-                FontSize = 13
+                FontSize = 16
             };
 
             ThemeControl(header);

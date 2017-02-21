@@ -31,6 +31,20 @@ To enable LESS compilation, simply click the watermark and it changes to indicat
 
 ![Watermark On](art/watermark-on.png)
 
+For files that are being ignored, the watermark looks like this:
+
+![Watermark Ignored](art/watermark-ignored.png)
+
+All `.less` files in the following folders are ignored from compilation:
+
+1. node_modules
+2. bower_components
+3. jspm_packages
+4. lib
+5. vendor
+
+You can stil reference these files from your own `.less` files, but they will not be compiled themselves.
+
 Saving the LESS file will then compile into CSS.
 
 ![Solution Explorer](art/solution-explorer.png)
