@@ -16,7 +16,7 @@ See the [change log](CHANGELOG.md) for changes and road map.
 - Compiles .less files on save
 - Uses the [official LESS](https://www.npmjs.com/package/less) node module
 - Automatially runs [autoprefix](https://www.npmjs.com/package/less-plugin-autoprefix)
-- Automatically runs [CSSComb](https://www.npmjs.com/package/less-plugin-csscomb)
+- Support for [CSSComb](https://www.npmjs.com/package/less-plugin-csscomb)
 - All compiler options configurable
 - Minification support
 
@@ -61,7 +61,7 @@ You can set any compiler options as defined on the [LESS compiler website](http:
 The default less compiler arguments are:
 
 ```bash
-lessc --relative-urls --autoprefix="> 0%" --csscomb=zen "<file.css>"
+lessc --relative-urls --autoprefix="> 0%" "<file.css>"
 ```
 
 Here are some examples of the code comments to use in the `.less` files:
@@ -90,7 +90,7 @@ See [Browserlist](https://github.com/ai/browserslist) for description on how to 
 // lessc --csscomb=zen
 ```
 
-Available values are `zen`, `yandex` and `csscomb`.
+Available values are `zen`, `yandex` and `csscomb`. Remember to specify `--csscomb` after `--autoprefix` if both are specified.
 
 #### Minification
 By default a `.min.css` file is generated, but that can be turned off by a comment containing `no-minify` in it. You can combine it with the compiler configuration like so:

@@ -4,6 +4,8 @@
 - [x] Output window log time to build LESS catalog
 - [x] Made .less file parsing async
 - [x] File nesting support for Website Projects
+- [x] Made CSSComb opt-in only
+- [ ] Support linked .less files
 
 Features that have a checkmark are complete and available for
 download in the

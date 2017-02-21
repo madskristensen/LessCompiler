@@ -15,7 +15,7 @@ namespace LessCompiler
     public class ProjectMap : IDisposable
     {
         private static string[] _ignore = { "\\node_modules\\", "\\bower_components\\", "\\jspm_packages\\", "\\lib\\", "\\vendor\\" };
-        private static Regex _import = new Regex(@"@import ([""'])(?<url>[^""']+)\1|url\(([""']?)(?<url>[^""')]+)\2\)", RegexOptions.IgnoreCase);
+        private static Regex _import = new Regex(@"@import(?:[^""']+)?(([""'])(?<url>[^""']+)\2|url\(([""']?)(?<url>[^""')]+)\3\))", RegexOptions.IgnoreCase | RegexOptions.Multiline);
         private ProjectItemsEvents _events;
 
         public ProjectMap()
@@ -117,13 +117,20 @@ namespace LessCompiler
             foreach (ProjectItem item in items)
             {
                 if (item.IsSupportedFile(out string filePath) && File.Exists(filePath))
+                {
                     files.Add(filePath);
+                }
 
-                if (item.ProjectItems != null)
+                if (!ShouldIgnore(filePath) && item.ProjectItems != null)
                     FindLessFiles(item.ProjectItems, files);
             }
 
             return files;
+        }
+
+        private static bool ShouldIgnore(string filePath)
+        {
+            return _ignore.Any(ign => filePath.IndexOf(ign, StringComparison.OrdinalIgnoreCase) > -1);
         }
 
         private void OnProjectItemRenamed(ProjectItem item, string OldName)

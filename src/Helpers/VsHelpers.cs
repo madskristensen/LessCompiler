@@ -147,6 +147,10 @@ namespace LessCompiler
         public static bool IsSupportedFile(this ProjectItem item, out string FilePath)
         {
             FilePath = item.FilePath();
+
+            if (item.Kind == EnvDTE.Constants.vsProjectItemKindPhysicalFolder)
+                return false;
+
             string ext = Path.GetExtension(item.FilePath());
             return ext.Equals(".less", StringComparison.OrdinalIgnoreCase);
         }
