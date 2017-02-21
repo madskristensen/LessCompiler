@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace LessCompiler
 {
@@ -34,15 +35,18 @@ namespace LessCompiler
 
             await Task.Run(() =>
             {
-                IEnumerable<string> lessFiles = FindLessFiles(root);
+                var sw = new Stopwatch();
+                sw.Start();
+
+                IEnumerable<string> lessFiles = FindLessFiles(project.ProjectItems);
 
                 foreach (string file in lessFiles)
                 {
-                    ProjectItem item = VsHelpers.DTE.Solution.FindProjectItem(file);
-
-                    if (item != null)
-                        AddFile(file);
+                    AddFile(file);
                 }
+
+                sw.Stop();
+                Logger.Log($"LESS file catalog for {project.Name} built in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
             });
         }
 
@@ -107,33 +111,45 @@ namespace LessCompiler
             }
         }
 
-        private static IEnumerable<string> FindLessFiles(string folder, List<string> files = null)
+        private static IEnumerable<string> FindLessFiles(ProjectItems items, List<string> files = null)
         {
             if (files == null)
                 files = new List<string>();
 
-            IEnumerable<string> lessFiles = Directory.EnumerateFiles(folder, "*.less");
-
-            foreach (string file in lessFiles)
+            foreach (ProjectItem item in items)
             {
-                if (!_ignore.Any(i => file.IndexOf(i, StringComparison.OrdinalIgnoreCase) > -1))
-                    files.Add(file);
-            }
+                if (item.IsSupportedFile(out string filePath) && File.Exists(filePath))
+                    files.Add(filePath);
 
-            IEnumerable<string> subDirs = Directory.EnumerateDirectories(folder);
-
-            foreach (string dir in subDirs)
-            {
-                if (!_ignore.Any(i => dir.IndexOf(i, StringComparison.OrdinalIgnoreCase) > -1))
-                    FindLessFiles(dir, files);
+                FindLessFiles(item.ProjectItems, files);
             }
 
             return files;
         }
 
+        //private static IEnumerable<string> FindLessFiles(string folder, List<string> files = null)
+        //{
+        //    if (files == null)
+        //        files = new List<string>();
+
+        //    foreach (string file in Directory.EnumerateFiles(folder, "*.less"))
+        //    {
+        //        if (!_ignore.Any(i => file.IndexOf(i, StringComparison.OrdinalIgnoreCase) > -1))
+        //            files.Add(file);
+        //    }
+
+        //    foreach (string dir in Directory.EnumerateDirectories(folder))
+        //    {
+        //        if (!_ignore.Any(i => dir.IndexOf(i, StringComparison.OrdinalIgnoreCase) > -1))
+        //            FindLessFiles(dir, files);
+        //    }
+
+        //    return files;
+        //}
+
         private async void OnProjectItemRenamed(ProjectItem item, string OldName)
         {
-            if (!item.IsSupportedFile())
+            if (!item.IsSupportedFile(out string filePath))
                 return;
 
             LessFiles.Clear();
@@ -142,20 +158,20 @@ namespace LessCompiler
 
         private void OnProjectItemRemoved(ProjectItem item)
         {
-            if (!item.IsSupportedFile())
+            if (!item.IsSupportedFile(out string filePath))
                 return;
 
-            CompilerOptions existing = LessFiles.Keys.FirstOrDefault(c => c.InputFilePath == item.FilePath());
+            CompilerOptions existing = LessFiles.Keys.FirstOrDefault(c => c.InputFilePath == filePath);
 
             RemoveFile(existing);
         }
 
         private void OnProjectItemAdded(ProjectItem item)
         {
-            if (!item.IsSupportedFile())
+            if (!item.IsSupportedFile(out string filePath))
                 return;
 
-            AddFile(item.FilePath());
+            AddFile(filePath);
         }
 
         public void Dispose()

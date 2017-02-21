@@ -143,8 +143,9 @@ namespace LessCompiler
             return item.FileNames[1];
         }
 
-        public static bool IsSupportedFile(this ProjectItem item)
+        public static bool IsSupportedFile(this ProjectItem item, out string FilePath)
         {
+            FilePath = item.FilePath();
             string ext = Path.GetExtension(item.FilePath());
             return ext.Equals(".less", StringComparison.OrdinalIgnoreCase);
         }

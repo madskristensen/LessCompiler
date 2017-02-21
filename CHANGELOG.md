@@ -1,6 +1,7 @@
 # Road map
 
-- [ ] Nothing yet...
+- [x] Get .less files from project system instead of file system
+- [x] Output window log time to build LESS catalog
 
 Features that have a checkmark are complete and available for
 download in the
