@@ -1,4 +1,5 @@
-﻿
+﻿; This adds support for file nesting in Website Projects
+
 ; LESS
 [$RootKey$\Projects\{E24C65DC-7377-472b-9ABA-BC803B73C61A}\RelatedFiles\.less]
 "RelationType"=dword:00000001
