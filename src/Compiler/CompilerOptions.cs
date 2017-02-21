@@ -103,7 +103,7 @@ namespace LessCompiler
                 parent = parent.Parent;
             }
 
-            return "--relative-urls --autoprefix=\">0%\"";
+            return "--relative-urls --autoprefix=\"> 1%\"";
         }
 
         public override bool Equals(object obj)

@@ -25,7 +25,7 @@ namespace LessCompilerTest
             CompilerResult result = await Execute("autoprefix.less");
 
             Assert.IsFalse(result.HasError);
-            Assert.AreEqual("body {\n  -webkit-transition: ease;\n  -o-transition: ease;\n  -moz-transition: ease;\n  transition: ease;\n}\n", File.ReadAllText(result.OutputFile));
+            Assert.AreEqual("body {\n  -webkit-transition: ease;\n  transition: ease;\n}\n", File.ReadAllText(result.OutputFile));
         }
 
         [TestMethod]

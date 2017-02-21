@@ -38,7 +38,7 @@ namespace LessCompilerTest
         {
             CompilerOptions options = await CompilerOptions.Parse(_lessFilePath, "/* no-compile no-minify */");
 
-            Assert.AreEqual("\"autoprefix.less\" --relative-urls --autoprefix=\">0%\" \"autoprefix.css\"", options.Arguments);
+            Assert.AreEqual("\"autoprefix.less\" --relative-urls --autoprefix=\"> 1%\" \"autoprefix.css\"", options.Arguments);
             Assert.AreEqual(options.OutputFilePath, Path.ChangeExtension(_lessFilePath, ".css"));
             Assert.IsFalse(options.Compile);
             Assert.IsFalse(options.Minify);

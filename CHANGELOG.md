@@ -5,6 +5,7 @@
 - [x] Made .less file parsing async
 - [x] File nesting support for Website Projects
 - [x] Made CSSComb opt-in only
+- [x] Changed autoprefix value to `> 1%`
 - [ ] Support linked .less files
 
 Features that have a checkmark are complete and available for
