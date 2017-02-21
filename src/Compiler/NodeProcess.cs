@@ -120,7 +120,7 @@ namespace LessCompiler
 
                     proc.WaitForExit();
 
-                    return new CompilerResult(options.OutputFilePath, error, arguments);
+                    return new CompilerResult(options.OutputFilePath, error.Trim(), arguments);
                 }
             }
             catch (Exception ex)

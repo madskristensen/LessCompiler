@@ -32,7 +32,7 @@ namespace LessCompiler
 
         public static async Task<CompilerOptions> Parse(string lessFilePath, string lessContent = null)
         {
-            if (!File.Exists(lessFilePath))
+            if (!File.Exists(lessFilePath) || ProjectMap.ShouldIgnore(lessFilePath))
                 return null;
 
             lessContent = lessContent ?? await VsHelpers.ReadFileAsync(lessFilePath);

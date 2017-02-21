@@ -54,7 +54,8 @@ namespace LessCompiler
             if (existing != null)
                 LessFiles.Remove(existing);
 
-            await AddFile(options.InputFilePath);
+            if (!ShouldIgnore(options.InputFilePath))
+                await AddFile(options.InputFilePath);
         }
 
         public void RemoveFile(CompilerOptions options)
@@ -102,7 +103,9 @@ namespace LessCompiler
                 if (import == null)
                 {
                     import = await CompilerOptions.Parse(childFilePath);
-                    await AddFile(childFilePath);
+
+                    if (!ShouldIgnore(childFilePath))
+                        await AddFile(childFilePath);
                 }
 
                 LessFiles[options].Add(import);
@@ -128,7 +131,7 @@ namespace LessCompiler
             return files;
         }
 
-        private static bool ShouldIgnore(string filePath)
+        public static bool ShouldIgnore(string filePath)
         {
             return _ignore.Any(ign => filePath.IndexOf(ign, StringComparison.OrdinalIgnoreCase) > -1);
         }

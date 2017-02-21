@@ -60,11 +60,6 @@ namespace LessCompiler
         {
             Visibility = Visibility.Hidden;
 
-            Loaded += (s, e) =>
-            {
-                Initialize();
-            };
-
             IAdornmentLayer adornmentLayer = view.GetAdornmentLayer(AdornmentLayer.LayerName);
 
             if (adornmentLayer.IsEmpty)
@@ -79,7 +74,7 @@ namespace LessCompiler
             });
         }
 
-        private void Initialize()
+        protected override void OnInitialized(EventArgs e)
         {
             Text = "Generated";
             FontSize = 75;

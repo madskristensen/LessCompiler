@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
 using System.Windows.Threading;
+using System.Linq;
 
 namespace LessCompiler
 {
@@ -25,9 +26,10 @@ namespace LessCompiler
 
         public void VsTextViewCreated(IVsTextView textViewAdapter)
         {
-            _view = AdaptersFactory.GetWpfTextView(textViewAdapter);
+            IWpfTextView view = AdaptersFactory.GetWpfTextView(textViewAdapter);
+            _view = view;
 
-            if (!DocumentService.TryGetTextDocument(_view.TextBuffer, out ITextDocument doc))
+            if (!DocumentService.TryGetTextDocument(view.TextBuffer, out ITextDocument doc))
                 return;
 
             _project = VsHelpers.DTE.Solution.FindProjectItem(doc.FilePath)?.ContainingProject;
@@ -37,10 +39,19 @@ namespace LessCompiler
                 if (!_project.SupportsCompilation())
                     return;
 
-                _view.Properties.AddProperty("adornment", new LessAdornment(_view, _project));
+                bool isEnabled = _project.IsLessCompilationEnabled();
 
-                if (_project.IsLessCompilationEnabled())
-                    await LessCatalog.EnsureCatalog(_project);
+                LessAdornment adornment = view.Properties.GetOrCreateSingletonProperty(() => new LessAdornment(view, _project));
+
+                if (isEnabled && await LessCatalog.EnsureCatalog(_project))
+                {
+                    CompilerOptions options = LessCatalog.Catalog[_project.UniqueName].LessFiles.Keys.FirstOrDefault(l => l.InputFilePath == doc.FilePath);
+
+                    if (options != null)
+                    {
+                        await adornment.Update(options);
+                    }
+                }
             });
 
             doc.FileActionOccurred += DocumentSaved;
@@ -59,7 +70,12 @@ namespace LessCompiler
             {
                 CompilerOptions options = await CompilerOptions.Parse(e.FilePath, _view.TextBuffer.CurrentSnapshot.GetText());
 
-                if (options == null)
+                if (_view.Properties.TryGetProperty(typeof(LessAdornment), out LessAdornment adornment))
+                {
+                    await adornment.Update(options);
+                }
+
+                if (options == null || !_project.SupportsCompilation() || !_project.IsLessCompilationEnabled())
                     return;
 
                 await LessCatalog.UpdateFile(_project, options);

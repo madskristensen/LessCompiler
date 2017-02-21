@@ -10,19 +10,19 @@ using System.Windows.Threading;
 
 namespace LessCompiler
 {
-    class LessAdornment : TextBlock
+    class LessAdornment : StackPanel
     {
         private Project _project;
+        private CompilerOptions _options;
+        private TextBlock _text;
+        private ITextView _view;
 
         public LessAdornment(IWpfTextView view, Project project)
         {
+            _view = view;
             _project = project;
-            Visibility = Visibility.Hidden;
 
-            Loaded += (s, e) =>
-            {
-                Initialize();
-            };
+            Visibility = Visibility.Hidden;
 
             view.Closed += ViewClosed;
             Settings.Changed += SettingsChanged;
@@ -41,26 +41,57 @@ namespace LessCompiler
             });
         }
 
-        private void Initialize()
+        protected override void OnInitialized(EventArgs e)
         {
+            //base.OnInitialized(e);
+
             bool enabled = _project.IsLessCompilationEnabled();
+
+            Opacity = 0.5;
+            Cursor = Cursors.Hand;
+            MouseLeftButtonUp += OnClick;
+
+            var header = new TextBlock()
+            {
+                FontSize = 17,
+                Text = "LESS Compiler"
+            };
+
+            _text = new TextBlock
+            {
+                FontSize = 13
+            };
+
+            _text.SetResourceReference(Control.ForegroundProperty, VsBrushes.CaptionTextKey);
+            _text.SetValue(TextOptions.TextRenderingModeProperty, TextRenderingMode.Aliased);
+            _text.SetValue(TextOptions.TextFormattingModeProperty, TextFormattingMode.Ideal);
 
             SetText(enabled);
 
-            FontSize = 17;
-            Cursor = Cursors.Hand;
-            Opacity = 0.5;
+            Children.Add(header);
+            Children.Add(_text);
+        }
 
-            SetResourceReference(Control.ForegroundProperty, VsBrushes.CaptionTextKey);
-            SetValue(TextOptions.TextRenderingModeProperty, TextRenderingMode.Aliased);
-            SetValue(TextOptions.TextFormattingModeProperty, TextFormattingMode.Ideal);
-            MouseLeftButtonUp += OnClick;
+        public async System.Threading.Tasks.Task Update(CompilerOptions options)
+        {
+            _options = options;
+
+            await Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
+            {
+                bool enabled = _project.IsLessCompilationEnabled();
+                SetText(enabled);
+
+                SetAdornmentLocation(_view, EventArgs.Empty);
+            }));
         }
 
         private void SetText(bool enabled)
         {
-            string onOff = enabled ? "On" : "Off";
-            Text = $"Compile: {onOff}";
+            string projectOnOff = enabled ? "On" : "Off";
+            string fileOnOff = _options == null ? "Ignored" : (_options.Compile ? "On" : "Off");
+
+            _text.Text = $"   Project: {projectOnOff}\r\n" +
+                         $"   File: {fileOnOff}";
 
             if (enabled)
                 ToolTip = $"The LESS Compiler is enabled for project \"{_project.Name}\".\r\nClick to disable it.";
