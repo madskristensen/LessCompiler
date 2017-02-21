@@ -1,4 +1,5 @@
 ﻿using EnvDTE;
+using ThreadHelper = Microsoft.VisualStudio.Shell.ThreadHelper;
 using EnvDTE80;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace LessCompiler
 {
@@ -124,13 +126,20 @@ namespace LessCompiler
             return files;
         }
 
-        private async void OnProjectItemRenamed(ProjectItem item, string OldName)
+        private void OnProjectItemRenamed(ProjectItem item, string OldName)
         {
             if (!item.IsSupportedFile(out string filePath))
                 return;
 
-            LessFiles.Clear();
-            await BuildMap(item.ContainingProject);
+            ThreadHelper.Generic.BeginInvoke(DispatcherPriority.ApplicationIdle, () =>
+            {
+                LessFiles.Clear();
+
+                Task.Run(async () =>
+                {
+                    await BuildMap(item.ContainingProject);
+                });
+            });
         }
 
         private void OnProjectItemRemoved(ProjectItem item)
@@ -138,17 +147,23 @@ namespace LessCompiler
             if (!item.IsSupportedFile(out string filePath))
                 return;
 
-            CompilerOptions existing = LessFiles.Keys.FirstOrDefault(c => c.InputFilePath == filePath);
+            ThreadHelper.Generic.BeginInvoke(DispatcherPriority.ApplicationIdle, () =>
+            {
+                CompilerOptions existing = LessFiles.Keys.FirstOrDefault(c => c.InputFilePath == filePath);
 
-            RemoveFile(existing);
+                RemoveFile(existing);
+            });
         }
 
-        private async void OnProjectItemAdded(ProjectItem item)
+        private void OnProjectItemAdded(ProjectItem item)
         {
             if (!item.IsSupportedFile(out string filePath))
                 return;
 
-            await AddFile(filePath);
+            ThreadHelper.Generic.BeginInvoke(DispatcherPriority.ApplicationIdle, async () =>
+            {
+                await AddFile(filePath);
+            });
         }
 
         public void Dispose()

@@ -117,6 +117,8 @@ The default file cannot contain information about the output file, but all other
 --source-map --relative-urls --strict-math
 ```
 
+Note that it isn't prefixed with `//` 
+
 Even though minification isn't technically an option you set on the compiler, you can still opt out of minification like so:
 
 ```
