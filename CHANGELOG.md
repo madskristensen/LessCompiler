@@ -6,7 +6,8 @@
 - [x] File nesting support for Website Projects
 - [x] Made CSSComb opt-in only
 - [x] Changed autoprefix value to `> 1%`
-- [ ] Show more information on adornment
+- [x] Show more information on adornment
+- [x] Dark theme support for watermarks
 - [ ] Support linked .less files
 
 Features that have a checkmark are complete and available for

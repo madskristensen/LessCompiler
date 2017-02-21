@@ -5,8 +5,8 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
-using System.Windows.Threading;
 using System.Linq;
+using System.Windows.Threading;
 
 namespace LessCompiler
 {
@@ -34,11 +34,14 @@ namespace LessCompiler
 
             _project = VsHelpers.DTE.Solution.FindProjectItem(doc.FilePath)?.ContainingProject;
 
+            if (!_project.SupportsCompilation())
+                return;
+
+            Settings.Changed += OnSettingsChanged;
+            view.Closed += OnViewClosed;
+
             Microsoft.VisualStudio.Shell.ThreadHelper.Generic.BeginInvoke(DispatcherPriority.ApplicationIdle, async () =>
             {
-                if (!_project.SupportsCompilation())
-                    return;
-
                 bool isEnabled = _project.IsLessCompilationEnabled();
 
                 LessAdornment adornment = view.Properties.GetOrCreateSingletonProperty(() => new LessAdornment(view, _project));
@@ -55,6 +58,22 @@ namespace LessCompiler
             });
 
             doc.FileActionOccurred += DocumentSaved;
+        }
+
+        private async void OnSettingsChanged(object sender, SettingsChangedEventArgs e)
+        {
+            if (!e.Enabled)
+                return;
+
+            if (_view.Properties.TryGetProperty(typeof(LessAdornment), out LessAdornment adornment))
+            {
+                if (!DocumentService.TryGetTextDocument(_view.TextBuffer, out ITextDocument doc))
+                    return;
+
+                CompilerOptions options = await CompilerOptions.Parse(doc.FilePath);
+
+                await adornment.Update(options);
+            }
         }
 
         private async void DocumentSaved(object sender, TextDocumentFileActionEventArgs e)
@@ -83,6 +102,11 @@ namespace LessCompiler
                 if (await LessCatalog.EnsureCatalog(_project))
                     await CompilerService.CompileAsync(options, _project);
             }
+        }
+
+        private void OnViewClosed(object sender, System.EventArgs e)
+        {
+            Settings.Changed -= OnSettingsChanged;
         }
     }
 }

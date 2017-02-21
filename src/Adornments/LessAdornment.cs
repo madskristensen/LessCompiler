@@ -31,20 +31,10 @@ namespace LessCompiler
 
             if (adornmentLayer.IsEmpty)
                 adornmentLayer.AddAdornment(AdornmentPositioningBehavior.ViewportRelative, null, null, this, null);
-
-            ThreadHelper.Generic.BeginInvoke(DispatcherPriority.ApplicationIdle, () =>
-            {
-                SetAdornmentLocation(view, EventArgs.Empty);
-
-                view.ViewportHeightChanged += SetAdornmentLocation;
-                view.ViewportWidthChanged += SetAdornmentLocation;
-            });
         }
 
         protected override void OnInitialized(EventArgs e)
         {
-            //base.OnInitialized(e);
-
             bool enabled = _project.IsLessCompilationEnabled();
 
             Opacity = 0.5;
@@ -62,14 +52,28 @@ namespace LessCompiler
                 FontSize = 13
             };
 
-            _text.SetResourceReference(Control.ForegroundProperty, VsBrushes.CaptionTextKey);
-            _text.SetValue(TextOptions.TextRenderingModeProperty, TextRenderingMode.Aliased);
-            _text.SetValue(TextOptions.TextFormattingModeProperty, TextFormattingMode.Ideal);
+            ThemeControl(header);
+            ThemeControl(_text);
 
             SetText(enabled);
 
             Children.Add(header);
             Children.Add(_text);
+
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
+            {
+                SetAdornmentLocation(_view, EventArgs.Empty);
+
+                _view.ViewportHeightChanged += SetAdornmentLocation;
+                _view.ViewportWidthChanged += SetAdornmentLocation;
+            }));
+        }
+
+        private void ThemeControl(TextBlock text)
+        {
+            text.SetResourceReference(Control.ForegroundProperty, VsBrushes.CaptionTextKey);
+            text.SetValue(TextOptions.TextRenderingModeProperty, TextRenderingMode.Aliased);
+            text.SetValue(TextOptions.TextFormattingModeProperty, TextFormattingMode.Ideal);
         }
 
         public async System.Threading.Tasks.Task Update(CompilerOptions options)
@@ -85,15 +89,18 @@ namespace LessCompiler
             }));
         }
 
-        private void SetText(bool enabled)
+        private void SetText(bool projectEnabled)
         {
-            string projectOnOff = enabled ? "On" : "Off";
+            string projectOnOff = projectEnabled ? "On" : "Off";
             string fileOnOff = _options == null ? "Ignored" : (_options.Compile ? "On" : "Off");
+
+            if (!projectEnabled && fileOnOff == "On")
+                fileOnOff = "Off";
 
             _text.Text = $"   Project: {projectOnOff}\r\n" +
                          $"   File: {fileOnOff}";
 
-            if (enabled)
+            if (projectEnabled)
                 ToolTip = $"The LESS Compiler is enabled for project \"{_project.Name}\".\r\nClick to disable it.";
             else
                 ToolTip = $"The LESS Compiler is disabled for project \"{_project.Name}\".\r\nClick to enable it.";
