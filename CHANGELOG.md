@@ -9,6 +9,7 @@
 - [x] Show more information on adornment
 - [x] Dark theme support for watermarks
 - [ ] Support linked .less files
+- [ ] Move all strings to .resx file
 
 Features that have a checkmark are complete and available for
 download in the

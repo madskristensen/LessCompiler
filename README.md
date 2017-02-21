@@ -1,4 +1,4 @@
-# CSS AutoPrefixer
+# LESS Compiler
 
 [![Build status](https://ci.appveyor.com/api/projects/status/uh1b5p1wx3ld64r9?svg=true)](https://ci.appveyor.com/project/madskristensen/lesscompiler)
 
