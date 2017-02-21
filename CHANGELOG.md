@@ -1,13 +1,5 @@
 # Road map
 
-- [x] Get .less files from project system instead of file system
-- [x] Output window log time to build LESS catalog
-- [x] Made .less file parsing async
-- [x] File nesting support for Website Projects
-- [x] Made CSSComb opt-in only
-- [x] Changed autoprefix value to `> 1%`
-- [x] Show more information on adornment
-- [x] Dark theme support for watermarks
 - [ ] Support linked .less files
 - [ ] Move all strings to .resx file
 
@@ -19,6 +11,17 @@ download in the
 
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
+
+## 0.9
+
+- [x] Get .less files from project system instead of file system
+- [x] Output window log time to build LESS catalog
+- [x] Made .less file parsing async
+- [x] File nesting support for Website Projects
+- [x] Made CSSComb opt-in only
+- [x] Changed autoprefix value to `> 1%`
+- [x] Show more information on adornment
+- [x] Dark theme support for watermarks
 
 ## 0.8
 
