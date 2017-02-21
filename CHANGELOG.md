@@ -3,6 +3,7 @@
 - [x] Get .less files from project system instead of file system
 - [x] Output window log time to build LESS catalog
 - [x] Made .less file parsing async
+- [x] File nesting support for Website Projects
 
 Features that have a checkmark are complete and available for
 download in the

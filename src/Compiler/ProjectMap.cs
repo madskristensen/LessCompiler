@@ -117,7 +117,8 @@ namespace LessCompiler
                 if (item.IsSupportedFile(out string filePath) && File.Exists(filePath))
                     files.Add(filePath);
 
-                FindLessFiles(item.ProjectItems, files);
+                if (item.ProjectItems != null)
+                    FindLessFiles(item.ProjectItems, files);
             }
 
             return files;
