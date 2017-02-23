@@ -62,7 +62,7 @@ The Output Window shows details about what is being executed to make it easy to 
 **Note** that the the solution (.sln) file is updated to reflect that LESS compilation is enabled. Remember to save the solution when prompted to persits the information.
 
 ### Compile all .less files
-The solution node in Solution Explorer has a command to compile all `.less` files in the projects enabled.
+The solution node in Solution Explorer has a command to compile all `.less` files in the enabled projects.
 
 ![Compile all .less files](art/context-menu-solution.png)
 
