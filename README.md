@@ -54,7 +54,8 @@ The automatic compilation doesn't happen if:
 1. The project hasn't been enabled for LESS compilation
 2. The .less file name starts with an underscore
 3. The .less file isn't part of any project
-4. A comment in the .less file with the word `no-compile` is found
+4. The .less file is in a ignored folder
+5. A comment in the .less file with the word `no-compile` is found
 
 The Output Window shows details about what is being executed to make it easy to troubleshoot any issues.
 
