@@ -52,7 +52,7 @@ Saving the LESS file will then compile into CSS.
 The automatic compilation doesn't happen if:
 
 1. The project hasn't been enabled for LESS compilation
-2. The .less file starts with an `_` like `_variables.less`
+2. The .less file name starts with an underscore
 3. The .less file isn't part of any project
 4. A comment in the .less file with the word `no-compile` is found
 
