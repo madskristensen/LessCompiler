@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using Tasks = System.Threading.Tasks;
 using EnvDTE80;
+using Microsoft.VisualStudio.Threading;
 
 namespace LessCompiler
 {
@@ -16,6 +17,8 @@ namespace LessCompiler
     {
         public static async Tasks.Task CompileProjectAsync(Project project)
         {
+            var tf = new JoinableTaskFactory(Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskContext);
+            await tf.SwitchToMainThreadAsync();
             if (project == null || !LessCatalog.Catalog.TryGetValue(project.UniqueName, out ProjectMap map))
                 return;
 
@@ -24,7 +27,7 @@ namespace LessCompiler
             foreach (CompilerOptions option in map.LessFiles.Keys)
             {
                 if (option.Compile)
-                    compileTasks.Add(CompileSingleFile(option));
+                    compileTasks.Add(CompileSingleFileAsync(option));
             }
 
             await Tasks.Task.WhenAll(compileTasks);
@@ -34,6 +37,8 @@ namespace LessCompiler
 
         public static async Tasks.Task CompileAsync(CompilerOptions options, Project project)
         {
+            var tf = new JoinableTaskFactory(Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskContext);
+            await tf.SwitchToMainThreadAsync();
             if (options == null || project == null || !LessCatalog.Catalog.TryGetValue(project.UniqueName, out ProjectMap map))
                 return;
 
@@ -50,7 +55,7 @@ namespace LessCompiler
 
             foreach (CompilerOptions parentOptions in parents.Where(p => p.Compile))
             {
-                compilerTaks.Add(CompileSingleFile(parentOptions));
+                compilerTaks.Add(CompileSingleFileAsync(parentOptions));
             }
 
             await Tasks.Task.WhenAll(compilerTaks);
@@ -60,7 +65,7 @@ namespace LessCompiler
             VsHelpers.WriteStatus($"LESS file compiled in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
         }
 
-        private static async Tasks.Task<bool> CompileSingleFile(CompilerOptions options)
+        private static async Tasks.Task<bool> CompileSingleFileAsync(CompilerOptions options)
         {
             try
             {
@@ -104,6 +109,8 @@ namespace LessCompiler
 
         private static void AddFilesToProject(CompilerOptions options)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             ProjectItem item = VsHelpers.DTE.Solution.FindProjectItem(options.InputFilePath);
 
             if (item?.ContainingProject != null)
@@ -139,7 +146,7 @@ namespace LessCompiler
                 CommentMode = CssComment.Important
             };
 
-            UgliflyResult result = Uglify.Css(cssContent, settings);
+            NUglify.UglifyResult result = Uglify.Css(cssContent, settings);
 
             if (result.HasErrors)
                 return;

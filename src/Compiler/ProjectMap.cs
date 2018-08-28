@@ -1,5 +1,6 @@
 ﻿using EnvDTE;
 using EnvDTE80;
+using Microsoft.VisualStudio.Threading;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -36,14 +37,20 @@ namespace LessCompiler
             var sw = new Stopwatch();
             sw.Start();
 
+            var tf = new JoinableTaskFactory(Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskContext);
+            await tf.SwitchToMainThreadAsync();
             IEnumerable<string> lessFiles = FindLessFiles(project.ProjectItems);
 
+            var tasklist = new List<Task>();
             foreach (string file in lessFiles)
             {
-                await AddFile(file);
+                tasklist.Add(AddFile(file));
             }
 
+            await Task.WhenAll(tasklist);
+
             sw.Stop();
+            await tf.SwitchToMainThreadAsync();
             Logger.Log($"LESS file catalog for {project.Name} built in {Math.Round(sw.Elapsed.TotalSeconds, 2)} seconds");
         }
 
@@ -78,7 +85,7 @@ namespace LessCompiler
             if (LessFiles.Keys.Any(c => c.InputFilePath == lessFilePath))
                 return;
 
-            string lessContent = File.ReadAllText(lessFilePath);
+            string lessContent = await VsHelpers.ReadFileAsync(lessFilePath);
 
             CompilerOptions options = await CompilerOptions.Parse(lessFilePath, lessContent);
             LessFiles.Add(options, new List<CompilerOptions>());
@@ -93,10 +100,19 @@ namespace LessCompiler
 
             foreach (Match match in _import.Matches(lessContent))
             {
-                string childFilePath = new FileInfo(Path.Combine(lessDir, match.Groups["url"].Value)).FullName;
-
-                if (!File.Exists(childFilePath))
+                string childFileName =Path.Combine(lessDir, match.Groups["url"].Value);
+                if (!File.Exists(childFileName))
+                {
+                    Logger.Log($"{childFileName} is inaccessible");
                     continue;
+                }
+                
+                string childFilePath = new FileInfo(childFileName).FullName;
+                if (!File.Exists(childFilePath))
+                {
+                    Logger.Log($"{childFilePath} is inaccessible");
+                    continue;
+                }
 
                 CompilerOptions import = LessFiles.Keys.FirstOrDefault(c => c.InputFilePath == childFilePath);
 
@@ -114,6 +130,7 @@ namespace LessCompiler
 
         private static IEnumerable<string> FindLessFiles(ProjectItems items, List<string> files = null)
         {
+            Dispatcher.CurrentDispatcher.VerifyAccess();
             if (files == null)
                 files = new List<string>();
 
@@ -143,11 +160,13 @@ namespace LessCompiler
 
             ThreadHelper.Generic.BeginInvoke(DispatcherPriority.ApplicationIdle, () =>
             {
+                Dispatcher.CurrentDispatcher.VerifyAccess();
                 LessFiles.Clear();
 
+                Project itemContainingProject = item.ContainingProject;
                 Task.Run(async () =>
                 {
-                    await BuildMap(item.ContainingProject);
+                    await BuildMap(itemContainingProject);
                 });
             });
         }
