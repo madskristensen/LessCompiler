@@ -9,8 +9,8 @@ using Tasks = System.Threading.Tasks;
 namespace LessCompiler
 {
     [Guid(PackageGuids.guidPackageString)]
-    [PackageRegistration(UseManagedResourcesOnly = true)]
-    [InstalledProductRegistration("#110", "#112", Vsix.Version, IconResourceID = 400)]
+    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
+    [InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     public sealed class LessCompilerPackage : AsyncPackage
     {
