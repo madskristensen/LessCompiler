@@ -78,6 +78,9 @@ namespace LessCompiler
             if (LessFiles.Keys.Any(c => c.InputFilePath == lessFilePath))
                 return;
 
+            if (!File.Exists(lessFilePath))
+                return;
+
             string lessContent = File.ReadAllText(lessFilePath);
 
             CompilerOptions options = await CompilerOptions.Parse(lessFilePath, lessContent);
