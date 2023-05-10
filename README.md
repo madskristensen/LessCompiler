@@ -43,7 +43,7 @@ All `.less` files in the following folders are ignored from compilation:
 4. lib
 5. vendor
 
-You can stil reference these files from your own `.less` files, but they will not be compiled themselves.
+You can still reference these files from your own `.less` files, but they will not be compiled themselves.
 
 Saving the LESS file will then compile into CSS.
 
